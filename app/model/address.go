@@ -119,6 +119,8 @@ func (wa *WalletAddress) GetTokenContract() string {
 		return conf.UsdtBep20
 	case OrderTradeTypeUsdtXlayer:
 		return conf.UsdtXlayer
+	case OrderTradeTypeUsdtAptos:
+		return conf.UsdtAptos
 	case OrderTradeTypeUsdtSolana:
 		return conf.UsdtSolana
 	case OrderTradeTypeUsdcErc20:
@@ -131,6 +133,8 @@ func (wa *WalletAddress) GetTokenContract() string {
 		return conf.UsdcPolygon
 	case OrderTradeTypeUsdcArbitrum:
 		return conf.UsdcArbitrum
+	case OrderTradeTypeUsdcAptos:
+		return conf.UsdcAptos
 	case OrderTradeTypeUsdcSolana:
 		return conf.UsdcSolana
 	default:
