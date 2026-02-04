@@ -169,8 +169,32 @@
         </a-row>
       </a-card>
 
+      <!-- 交易信息卡片 -->
+      <a-card class="detail-card" title="交易信息" :bordered="false" v-if="(detailData.status === 2 || detailData.status === 5) && userStores.trade_type_config[detailData.trade_type]?.TargetType === 1">
+        <a-row :gutter="24">
+          <a-col :span="12" v-if="detailData.ref_orderno">
+            <div class="detail-item">
+              <div class="detail-label">
+                <icon-swap />
+                <span>交易订单号</span>
+              </div>
+              <div class="detail-value">{{ detailData.ref_orderno }}</div>
+            </div>
+          </a-col>
+          <a-col :span="12" v-if="detailData.ref_from_info">
+            <div class="detail-item">
+              <div class="detail-label">
+                <icon-user />
+                <span>付款方账号</span>
+              </div>
+              <div class="detail-value">{{ detailData.ref_from_info }}</div>
+            </div>
+          </a-col>
+        </a-row>
+      </a-card>
+
       <!-- 区块链信息卡片 -->
-      <a-card class="detail-card" title="区块链数据" :bordered="false" v-if="detailData.status === 2 || detailData.status === 5">
+      <a-card class="detail-card" title="区块链数据" :bordered="false" v-if="(detailData.status === 2 || detailData.status === 5) && userStores.trade_type_config[detailData.trade_type]?.TargetType !== 1">
         <a-row :gutter="24" v-if="detailData.ref_hash">
           <a-col :span="12" v-if="detailData.ref_block_num">
             <div class="detail-item">
@@ -251,6 +275,7 @@
 import { getCryptoColor } from "@/views/rate/common";
 import { delOrderApi } from "@/api/modules/order/index";
 import { Notification } from "@arco-design/web-vue";
+import { useUserInfoStore } from "@/store/modules/user-info";
 
 const props = defineProps({
   visible: Boolean,
@@ -259,6 +284,8 @@ const props = defineProps({
     required: true
   }
 });
+
+const userStores = useUserInfoStore();
 
 const emits = defineEmits(["close", "refresh"]);
 

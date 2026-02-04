@@ -252,6 +252,20 @@ var registry = map[TradeType]TradeTypeConf{
 		ExplorerFmt: "https://bscscan.com/tx/%s",
 		EndpointKey: RpcEndpointBsc,
 	},
+	AlipayMck: {
+		Alias:    "Alipay・Mck",
+		Network:  conf.Alipay,
+		Crypto:   CNYE,
+		Decimal:  2,
+		Native:   true,
+		Contract: "alipay",
+		AmountRange: Range{
+			MinAmount: decimal.NewFromFloat(0.01),
+			MaxAmount: decimal.NewFromFloat(50000),
+		},
+		EndpointKey: "",
+		TargetType:  TargetTypeChannel,
+	},
 }
 
 func init() {
@@ -291,6 +305,17 @@ func GetAllAlias() map[string]string {
 	}
 
 	return alias
+}
+
+// 获取所有交易类型配置，用于区分通道和钱包
+func GetAllTradeConfig() map[string]TradeTypeConf {
+	var conf = make(map[string]TradeTypeConf)
+
+	for t, c := range registry {
+		conf[string(t)] = c
+	}
+
+	return conf
 }
 
 func GetNetworkTrades(n Network) []TradeType {

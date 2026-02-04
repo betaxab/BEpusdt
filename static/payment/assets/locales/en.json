@@ -14,6 +14,7 @@
     "seconds": "sec",
     "addressLabel": "Receiving Address ({{network}} Network)",
     "copyAddress": "Copy Address",
+    "openalipay": "Open Alipay App",
     "instructionsTitle": "📋 Transfer Instructions",
     "instruction1": "Must use <strong>{{network}} network</strong> for transfer, do not send {{warningToken}}!",
     "instruction2": "The system will automatically confirm the receipt after transfer",
@@ -36,4 +37,3 @@
     "processing": "Processing..."
   }
 }
-

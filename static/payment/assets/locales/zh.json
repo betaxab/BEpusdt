@@ -14,6 +14,7 @@
     "seconds": "秒",
     "addressLabel": "收款地址 ({{network}} 网络)",
     "copyAddress": "复制地址",
+    "openalipay": "点我唤起支付宝 APP",
     "instructionsTitle": "📋 转账说明",
     "instruction1": "必须使用 <strong>{{network}} 网络</strong> 进行转账，请勿转入 {{warningToken}}！",
     "instruction2": "转账完成后系统会自动确认到账",
@@ -36,4 +37,3 @@
     "processing": "处理中..."
   }
 }
-

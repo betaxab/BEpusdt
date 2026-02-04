@@ -172,6 +172,11 @@ func round(val float64, precision int) float64 {
 }
 
 func getOrderRate(token Crypto, fiat Fiat, syntax string) (decimal.Decimal, error) {
+	// CNY 不参与汇率计算
+	if token == CNYE {
+		return decimal.NewFromFloat(1), nil
+	}
+
 	var r Rate
 	Db.Where("crypto = ? and fiat = ?", token, fiat).Order("created_at desc").Limit(1).Find(&r)
 	if r.ID == 0 {
