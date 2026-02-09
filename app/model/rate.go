@@ -171,7 +171,7 @@ func round(val float64, precision int) float64 {
 	return math.Floor(val*p+0.5) / p
 }
 
-func getOrderRate(token Crypto, fiat Fiat, syntax string) (decimal.Decimal, error) {
+func GetOrderRate(token Crypto, fiat Fiat, syntax string) (decimal.Decimal, error) {
 	// CNY 不参与汇率计算
 	if token == CNYE {
 		return decimal.NewFromFloat(1), nil

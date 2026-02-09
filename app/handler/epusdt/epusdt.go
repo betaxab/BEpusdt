@@ -219,6 +219,107 @@ func (Epusdt) CheckStatus(ctx *gin.Context) {
 	})
 }
 
+// Methods API
+type methodsReq struct {
+	TradeID  string `json:"trade_id" binding:"required"`
+	Currency string `json:"currency"`
+}
+
+type methodItem struct {
+	Amount          string `json:"amount"`
+	ActualAmount    string `json:"actual_amount"`
+	Fiat            string `json:"fiat"`
+	ExchangeRate    string `json:"exchange_rate"`
+	Currency        string `json:"currency"`
+	Network         string `json:"network"`
+	TokenNetName    string `json:"token_net_name"`
+	TokenCustomName string `json:"token_custom_name"`
+	IsPopular       bool   `json:"is_popular"`
+}
+
+func (Epusdt) GetPaymentMethods(ctx *gin.Context) {
+	var req methodsReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(500, respFailJson(fmt.Sprintf("请求参数错误：%s", err.Error())))
+		return
+	}
+
+	order, ok := model.GetTradeOrder(req.TradeID)
+	if !ok {
+		ctx.JSON(400, respFailJson("订单不存在"))
+		return
+	}
+
+	if order.Status == model.OrderStatusExpired {
+		ctx.JSON(400, respFailJson("订单已过期"))
+		return
+	}
+
+	// 强制使用订单的法币类型
+	fiat := order.Fiat
+
+	var methods []methodItem
+	allTrades := model.GetAllTradeConfig()
+
+	for tradeTypeStr, conf := range allTrades {
+		// 如果指定了货币，则进行过滤
+		if req.Currency != "" && string(conf.Crypto) != req.Currency {
+			continue
+		}
+
+		// 检查是否有可用钱包/通道
+		var count int
+		tradeType := model.TradeType(tradeTypeStr)
+		if conf.TargetType == model.TargetTypeChannel {
+			count = len(model.GetAvailableChannel(tradeType))
+		} else {
+			count = len(model.GetAvailableAddress(tradeType))
+		}
+
+		if count == 0 {
+			continue
+		}
+
+		// 获取汇率配置的浮动语法
+		syntax := model.GetK(model.ConfKey(fmt.Sprintf("rate_float_%s_%s", conf.Crypto, fiat)))
+		
+		// 获取汇率
+		rate, err := model.GetOrderRate(conf.Crypto, fiat, syntax)
+		if err != nil {
+			log.Error(fmt.Sprintf("获取汇率失败：%s", err.Error()))
+			continue
+		}
+
+		// 计算实际支付金额 (加密货币)
+		// Money 是法币金额
+		moneyDecimal, _ := decimal.NewFromString(order.Money)
+
+		// 计算精度
+		atom, precision := model.GetAtomicity(model.TradeType(tradeTypeStr))
+		actualAmount := moneyDecimal.DivRound(rate, precision)
+		if actualAmount.LessThan(atom) {
+			actualAmount = atom
+		}
+		actualAmountStr := actualAmount.String()
+
+		methods = append(methods, methodItem{
+			Amount:          order.Money,
+			ActualAmount:    actualAmountStr,
+			Fiat:            string(fiat),
+			ExchangeRate:    rate.String(),
+			Currency:        string(conf.Crypto),
+			Network:         string(conf.Network),
+			TokenNetName:    string(conf.NetworkName),
+			TokenCustomName: "",    // 暂为空
+			IsPopular:       false, // 暂为 false
+		})
+	}
+
+	ctx.JSON(200, respSuccJson(gin.H{
+		"methods": methods,
+	}))
+}
+
 func respFailJson(message string) gin.H {
 
 	return gin.H{"status_code": 400, "message": message}
