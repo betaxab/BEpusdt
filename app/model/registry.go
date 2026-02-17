@@ -24,6 +24,7 @@ var supportCrypto = map[Crypto]CoinId{
 	TRX:  "tron",
 	BNB:  "binancecoin",
 	ETH:  "ethereum",
+	CNYE: "cnye-coin",
 }
 
 // TradeType 交易类型，当下类型开始增多，现在这里统一管理、尽量收缩配置项
@@ -272,6 +273,22 @@ var registry = map[TradeType]TradeTypeConf{
 		},
 		ExplorerFmt: "https://bscscan.com/tx/%s",
 		EndpointKey: RpcEndpointBsc,
+	},
+	AlipayMck: {
+		Alias:       "Alipay・Mck",
+		NetworkName: "Alipay",
+		Network:     conf.Alipay,
+		Crypto:      CNYE,
+		Decimal:     2,
+		Native:      true,
+		Contract:    "alipay",
+		AmountRange: Range{
+			MinAmount: decimal.NewFromFloat(0.01),
+			MaxAmount: decimal.NewFromFloat(50000),
+		},
+		ExplorerFmt: "https://shenghuo.alipay.com/send/queryTransferDetail.htm?tradeNo=%s",
+		EndpointKey: "",
+		TargetType:  TargetTypeChannel,
 	},
 }
 
