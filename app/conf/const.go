@@ -18,6 +18,7 @@ const (
 	Arbitrum = "arbitrum"
 	Ethereum = "ethereum"
 	Base     = "base"
+	Alipay   = "alipay"
 )
 
 const (
