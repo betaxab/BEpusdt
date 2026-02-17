@@ -16,7 +16,8 @@ export const getCryptoColor = (crypto: string): string => {
     USDC: "blue",
     TRX: "red",
     ETH: "purple",
-    BNB: "orange"
+    BNB: "orange",
+    CNYE: "magenta"
   };
   return colors[crypto] || "gray";
 };
