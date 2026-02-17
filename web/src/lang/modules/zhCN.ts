@@ -30,6 +30,7 @@ export default {
   menu: {
     ["home"]: "首页",
     ["wallet"]: "钱包管理",
+    ["channel"]: "通道管理",
     ["order"]: "交易订单",
     ["rate"]: "汇率监控",
     ["rate-list"]: "同步记录",

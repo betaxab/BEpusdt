@@ -1,9 +1,10 @@
 {
   "payment": {
     "title": "{{token}} 支付",
-    "subtitle": "请使用 <strong>{{networkName}}</strong> {{network}} 网络进行转账",
+    "subtitle": "请使用 <strong>{{token}} {{networkName}}</strong> 网络进行转账",
     "subtitleCashier": "请使用 <strong>{{token}} {{networkName}}</strong> 网络进行转账",
     "subtitle2": "请选择支付币种和网络",
+    "subtitle3": "请使用 <strong>{{token}}</strong> 进行转账",
     "networkBadge": "{{network}}",
     "paymentAmount": "付款数额:",
     "merchantOrder": "商户订单:",
@@ -20,7 +21,9 @@
     "selectCurrency": "请选择币种",
     "selectNetwork": "请选择网络",
     "payNow": "立即支付",
+    "openalipay": "点我唤起支付宝 APP",
     "instructionsTitle": "📋 转账说明",
+    "instrinfo1": "必须使用 <strong>{{token}}</strong> 进行转账",
     "instruction1": "必须使用 <strong>{{network}} 网络</strong> 进行转账，请勿转入 {{warningToken}}！",
     "instruction2": "转账完成后系统会自动确认到账",
     "instruction3": "转账金额必须与显示金额完全一致",

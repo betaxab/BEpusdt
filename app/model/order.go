@@ -22,6 +22,8 @@ const (
 	OrderStatusConfirming = 5 // 等待交易确认
 	OrderStatusFailed     = 6 // 交易确认失败
 
+	AlipayMck   TradeType = "alipay.mck"
+
 	BscBnb      TradeType = "bsc.bnb"
 	EthereumEth TradeType = "ethereum.eth"
 	TronTrx     TradeType = "tron.trx"
@@ -74,6 +76,8 @@ type Order struct {
 	NotifyUrl     string     `gorm:"column:notify_url;type:varchar(255);not null;default:'';comment:异步地址" json:"notify_url"`
 	NotifyNum     int        `gorm:"column:notify_num;type:int(11);not null;default:0;comment:回调次数" json:"notify_num"`
 	NotifyState   int        `gorm:"column:notify_state;type:tinyint(1);not null;default:0;comment:回调状态 1：成功 0：失败" json:"notify_state"`
+	RefOrderNo    string     `gorm:"column:ref_orderno;type:varchar(128);not null;default:'';index;comment:交易订单号" json:"ref_orderno"`
+	RefFrom       string     `gorm:"column:ref_from_info;type:varchar(128);not null;default:'';index;comment:交易付款方信息" json:"ref_from_info"`
 	RefHash       string     `gorm:"column:ref_hash;type:varchar(128);not null;default:'';index;comment:交易哈希" json:"ref_hash"`
 	RefBlockNum   int64      `gorm:"column:ref_block_num;type:varchar(64);not null;default:0;comment:区块索引" json:"ref_block_num"`
 	ExpiredAt     time.Time  `gorm:"column:expired_at;type:datetime;not null;comment:失效时间" json:"expired_at"`
@@ -110,6 +114,17 @@ func (o *Order) MarkConfirming(blockNum int64, from, hash string, at time.Time) 
 	o.ConfirmedAt = &at
 	o.RefHash = hash
 	o.RefBlockNum = blockNum
+	o.Status = OrderStatusConfirming
+
+	Db.Save(o)
+}
+
+// 标记通道 等待交易确认
+func (o *Order) MarkChannelConfirming(ref_orderno, ref_from_info string, hash string, at time.Time) {
+	o.RefOrderNo = ref_orderno
+	o.RefFrom = ref_from_info
+	o.RefHash = hash
+	o.ConfirmedAt = &at
 	o.Status = OrderStatusConfirming
 
 	Db.Save(o)

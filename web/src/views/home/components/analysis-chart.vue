@@ -49,7 +49,8 @@ const init = () => {
     const colorMap = {
       USDT: "#1E90FF",
       USDC: "#32CD32",
-      TRX: "#FF4500"
+      TRX: "#FF4500",
+      CNYE: "#F754A8"
     };
 
     const spec = {

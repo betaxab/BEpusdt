@@ -3,6 +3,8 @@ package utils
 import (
 	"crypto/md5"
 	"crypto/sha256"
+	"crypto/x509"
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"math"
@@ -96,6 +98,64 @@ func IsValidTronAddress(address string) bool {
 	match, err := regexp.MatchString(`^T[a-zA-Z0-9]{33}$`, address)
 
 	return match && err == nil
+}
+
+func IsValidAlipayQR(qr string) bool {
+	match, err := regexp.MatchString(`^https://qr\.alipay\.com/[a-zA-Z0-9]+$`, qr)
+
+	return match && err == nil
+}
+
+func IsValidAlipayAppId(appId string) bool {
+	// example 2021005103613111 16位纯数字
+	match, err := regexp.MatchString(`^\d{16}$`, appId)
+	return match && err == nil
+}
+
+func IsValidAlipayPublicKey(key string) bool {
+	// 验证支付宝公钥: Base64 解码并尝试解析为 PKIX 或 PKCS1 公钥
+	if key == "" {
+		return false
+	}
+	keyBytes, err := base64.StdEncoding.DecodeString(key)
+	if err != nil {
+		return false
+	}
+
+	// 尝试解析为 PKIX 公钥 (通常是这种情况)
+	if _, err := x509.ParsePKIXPublicKey(keyBytes); err == nil {
+		return true
+	}
+
+	// 尝试解析为 PKCS1 公钥
+	if _, err := x509.ParsePKCS1PublicKey(keyBytes); err == nil {
+		return true
+	}
+
+	return false
+}
+
+func IsValidAlipayPrivateKey(key string) bool {
+	// 验证支付宝私钥: Base64 解码并尝试解析为 PKCS1 或 PKCS8 私钥
+	if key == "" {
+		return false
+	}
+	keyBytes, err := base64.StdEncoding.DecodeString(key)
+	if err != nil {
+		return false
+	}
+
+	// 尝试解析为 PKCS1 私钥 (Alipay 常用非Java语言)
+	if _, err := x509.ParsePKCS1PrivateKey(keyBytes); err == nil {
+		return true
+	}
+
+	// 尝试解析为 PKCS8 私钥 (Alipay 常用Java语言)
+	if _, err := x509.ParsePKCS8PrivateKey(keyBytes); err == nil {
+		return true
+	}
+
+	return false
 }
 
 func IsValidEvmAddress(address string) bool {

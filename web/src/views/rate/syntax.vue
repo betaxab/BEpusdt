@@ -199,6 +199,18 @@
           />
         </a-form-item>
 
+        <a-form-item label="CNYE 颗粒度">
+          <a-input-number
+            v-model="atomForm.cnye"
+            :min="0.01"
+            :max="100"
+            :precision="undefined"
+            :step="0.000001"
+            placeholder="推荐0.01"
+            style="width: 100%"
+          />
+        </a-form-item>
+
         <a-form-item label="TRX 颗粒度">
           <a-input-number
             v-model="atomForm.trx"
@@ -299,6 +311,7 @@ const columns = [
       filters: [
         { text: "USDT", value: "USDT" },
         { text: "USDC", value: "USDC" },
+        { text: "CNYE", value: "CNYE" },
         { text: "TRX", value: "TRX" },
         { text: "ETH", value: "ETH" },
         { text: "BNB", value: "BNB" }
@@ -585,6 +598,7 @@ const atomFormRef = ref();
 const atomForm = reactive({
   usdt: 0.01,
   usdc: 0.01,
+  cnye: 0.01,
   trx: 0.01,
   eth: 0.000001,
   bnb: 0.00001
@@ -593,13 +607,14 @@ const atomForm = reactive({
 const showAtomModal = async () => {
   try {
     const res = await getsConfAPI({
-      keys: ["atom_usdt", "atom_usdc", "atom_trx", "atom_eth", "atom_bnb"]
+      keys: ["atom_usdt", "atom_usdc", "atom_cnye", "atom_trx", "atom_eth", "atom_bnb"]
     });
 
     if (res.data) {
       console.log(res.data);
       atomForm.usdt = res.data.atom_usdt ? parseFloat(res.data.atom_usdt) : 0.01;
       atomForm.usdc = res.data.atom_usdc ? parseFloat(res.data.atom_usdc) : 0.01;
+      atomForm.cnye = res.data.atom_cnye ? parseFloat(res.data.atom_cnye) : 0.01;
       atomForm.trx = res.data.atom_trx ? parseFloat(res.data.atom_trx) : 0.01;
       atomForm.eth = res.data.atom_eth ? parseFloat(res.data.atom_eth) : 0.000001;
       atomForm.bnb = res.data.atom_bnb ? parseFloat(res.data.atom_bnb) : 0.00001;
@@ -624,6 +639,7 @@ const handleAtomSubmit = async () => {
     await setsConfAPI([
       { key: "atom_usdt", value: atomForm.usdt.toString() },
       { key: "atom_usdc", value: atomForm.usdc.toString() },
+      { key: "atom_cnye", value: atomForm.cnye.toString() },
       { key: "atom_trx", value: atomForm.trx.toString() },
       { key: "atom_eth", value: atomForm.eth.toString() },
       { key: "atom_bnb", value: atomForm.bnb.toString() }
@@ -644,6 +660,7 @@ const handleAtomCancel = () => {
   atomFormRef.value?.resetFields();
   atomForm.usdt = 0.01;
   atomForm.usdc = 0.01;
+  atomForm.cnye = 0.01;
   atomForm.trx = 0.01;
   atomForm.eth = 0.000001;
   atomForm.bnb = 0.00001;

@@ -168,7 +168,12 @@ func BuildTrade(p OrderParams) (Trade, error) {
 		return Trade{}, fmt.Errorf("%s %s 汇率异常", crypto, p.Fiat)
 	}
 
-	var wallet = GetAvailableAddress(p.TradeType)
+	var wallet []string
+	if registry[p.TradeType].TargetType == TargetTypeChannel {
+		wallet = GetAvailableChannel(p.TradeType)
+	} else {
+		wallet = GetAvailableAddress(p.TradeType)
+	}
 	if p.Address != "" {
 		wallet = []string{p.Address}
 		if !AddrCaseSens(p.TradeType) { // 交易类型不区分大小写，统一转小写；这个地址最后的交易匹配要用到，千万不能错

@@ -121,7 +121,7 @@ func initMySQL(dsn string) error {
 }
 
 func AutoMigrate() error {
-	return Db.AutoMigrate(&Wallet{}, &Order{}, &NotifyRecord{}, &Conf{}, &Rate{})
+	return Db.AutoMigrate(&Wallet{}, &Channel{}, &Order{}, &NotifyRecord{}, &Conf{}, &Rate{})
 }
 
 func Close() {

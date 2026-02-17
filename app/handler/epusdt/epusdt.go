@@ -487,7 +487,11 @@ func (Epusdt) GetPaymentMethods(ctx *gin.Context) {
 		// 检查是否有可用钱包
 		var count int
 		tradeType := model.TradeType(tradeTypeStr)
-		count = len(model.GetAvailableAddress(tradeType))
+		if conf.TargetType == model.TargetTypeChannel {
+			count = len(model.GetAvailableChannel(tradeType))
+		} else {
+			count = len(model.GetAvailableAddress(tradeType))
+		}
 
 		if count == 0 {
 			continue

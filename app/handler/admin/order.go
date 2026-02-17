@@ -29,7 +29,9 @@ type oListReq struct {
 
 type paidReq struct {
 	base.IDRequest
-	RefHash string `json:"ref_hash"`
+	RefHash     string `json:"ref_hash"`
+	RefOrderNo  string `json:"ref_orderno"`
+	RefFromInfo string `json:"ref_from_info"`
 }
 
 type createReq struct {
@@ -112,7 +114,8 @@ func (Order) List(ctx *gin.Context) {
 
 	type order struct {
 		model.Order
-		Wallet model.Wallet `gorm:"foreignKey:MatchAddr,TradeType;references:Address,TradeType" json:"wallet"`
+		Wallet  model.Wallet  `gorm:"foreignKey:MatchAddr,TradeType;references:Address,TradeType" json:"wallet"`
+		Channel model.Channel `gorm:"foreignKey:MatchQr,TradeType;references:Address,TradeType" json:"channel"`
 	}
 
 	var data []order
@@ -153,7 +156,7 @@ func (Order) List(ctx *gin.Context) {
 
 	db.Model(&model.Order{}).Count(&total)
 
-	err := db.Preload("Wallet").Limit(req.Size).Offset((req.Page - 1) * req.Size).Order("id " + req.Sort).Find(&data).Error
+	err := db.Preload("Wallet").Preload("Channel").Limit(req.Size).Offset((req.Page - 1) * req.Size).Order("id " + req.Sort).Find(&data).Error
 	if err != nil {
 		base.Response(ctx, 400, err.Error())
 
@@ -207,9 +210,11 @@ func (Order) Paid(ctx *gin.Context) {
 	}
 
 	var update = map[string]interface{}{
-		"ref_hash":     req.RefHash,
-		"status":       model.OrderStatusSuccess,
-		"confirmed_at": model.Datetime(time.Now()),
+		"ref_hash":      req.RefHash,
+		"ref_orderno":   req.RefOrderNo,
+		"ref_from_info": req.RefFromInfo,
+		"status":        model.OrderStatusSuccess,
+		"confirmed_at":  model.Datetime(time.Now()),
 	}
 
 	err := model.Db.Model(&order).Updates(update).Error

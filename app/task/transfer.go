@@ -10,6 +10,7 @@ import (
 	"github.com/smallnest/chanx"
 	"github.com/v03413/bepusdt/app/conf"
 	"github.com/v03413/bepusdt/app/model"
+	"github.com/v03413/bepusdt/app/log"
 	"github.com/v03413/bepusdt/app/notifier"
 	"github.com/v03413/bepusdt/app/task/notify"
 	"github.com/v03413/tronprotocol/core"
@@ -77,11 +78,59 @@ func orderTransferHandle(ctx context.Context) {
 
 			var other = make([]transfer, 0)
 			// getAllWaitingOrders 内部包含过期检查逻辑
-			var orders = getAllWaitingOrders()
+			var orders, channelOrders = getAllWaitingOrders()
+
 			if len(batch) == 0 {
 				continue
 			}
 			for _, t := range batch {
+				// 通道相关交易
+				if chOrders, ok := channelOrders[t.TradeType]; ok {
+					// 判断数额是否在允许范围内
+					if !model.IsAmountValid(t.TradeType, t.Amount) {
+						continue
+					}
+
+					var matched bool
+					for _, o := range chOrders {
+						// 金额前缀匹配
+						if !amountMatch(t.Amount, o.Amount, string(o.TradeType)) {
+							continue
+						}
+
+						// 有效期检测
+						if time.Now().After(o.ExpiredAt) {
+							continue
+						}
+
+						// Check if payment is before order creation (prevent matching old transactions)
+						if t.Timestamp.Before(o.CreatedAt.Time()) {
+							continue
+						}
+
+						// Unique check: check if this alipay order no is already used
+						var count int64
+						model.Db.Model(&model.Order{}).Where("ref_hash = ?", t.TxHash).Count(&count)
+						if count > 0 {
+							log.Warn(fmt.Sprintf("Channel: order %s already used, skipping", t.TxHash))
+							continue
+						}
+
+						// 找到匹配的订单
+						o.MarkChannelConfirming(t.RecvAddress, t.FromAddress, t.TxHash, t.Timestamp)
+
+						log.Info(fmt.Sprintf("Channel: Order %s matched with trade %s", o.OrderId, t.TxHash))
+						matched = true
+						break
+					}
+
+					if !matched {
+						other = append(other, t)
+					}
+					continue
+				}
+
+				// 钱包相关交易
 				// 判断数额是否在允许范围内
 				if !model.IsAmountValid(t.TradeType, t.Amount) {
 					continue
@@ -229,9 +278,12 @@ func markFinalConfirmed(o model.Order) {
 	go notifier.Success(o) // 消息通知
 }
 
-func getAllWaitingOrders() map[string][]model.Order {
+func getAllWaitingOrders() (map[string][]model.Order, map[model.TradeType][]model.Order) {
 	var tradeOrders = model.GetOrderByStatus(model.OrderStatusWaiting)
 	var data = make(map[string][]model.Order)
+	var channelData = make(map[model.TradeType][]model.Order)
+	var configs = model.GetAllTradeConfig()
+
 	for _, t := range tradeOrders {
 		if time.Now().Unix() >= t.ExpiredAt.Unix() { // 订单过期
 			t.SetExpired()
@@ -240,11 +292,16 @@ func getAllWaitingOrders() map[string][]model.Order {
 			continue
 		}
 
+		if c, ok := configs[string(t.TradeType)]; ok && c.TargetType == model.TargetTypeChannel {
+			channelData[t.TradeType] = append(channelData[t.TradeType], t)
+			continue
+		}
+
 		key := t.Address + string(t.TradeType)
 		data[key] = append(data[key], t)
 	}
 
-	return data
+	return data, channelData
 }
 
 func getConfirmingOrders(tradeType []model.TradeType) []model.Order {

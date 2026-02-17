@@ -54,6 +54,9 @@ func CoingeckoRate() error {
 	var ids = make([]string, 0)
 	var tokens = make(map[CoinId]Crypto)
 	for token, id := range supportCrypto {
+		if token == CNYE {
+			continue
+		}
 		ids = append(ids, string(id))
 		tokens[id] = token
 	}
@@ -108,6 +111,49 @@ func CoingeckoRate() error {
 				RawRate: val.Float(),
 			})
 		}
+	}
+
+	// Calculate CNYE rates
+	var usdcRawRates = make(map[string]float64)
+	for _, row := range rows {
+		if row.Crypto == string(USDC) {
+			usdcRawRates[row.Fiat] = row.RawRate
+		}
+	}
+
+	for _, fiat := range fiats {
+		upperFiat := strings.ToUpper(fiat)
+		var rawRate float64
+
+		if upperFiat == string(CNY) {
+			rawRate = 1.0
+		} else {
+			usdcToCnyRaw, ok1 := usdcRawRates[string(CNY)]
+			usdcToFiatRaw, ok2 := usdcRawRates[upperFiat]
+			
+			if !ok1 || !ok2 || usdcToCnyRaw == 0 {
+				continue
+			}
+
+			// CNYE=(CNY到USDC的价格)/(订单法币到USDC的价格)
+			// Apply syntax to USDC->CNY rate if exists
+			syntax := GetK(ConfKey(fmt.Sprintf("rate_float_%s_%s", USDC, CNY)))
+			usdcToCny := ParseFloatRate(syntax, usdcToCnyRaw)
+
+			if usdcToCny == 0 {
+				continue
+			}
+			
+			// Use RAW rate for OrderFiat->USDC as syntax was not requested for this part
+			rawRate = round(usdcToFiatRaw/usdcToCny, 6)
+		}
+
+		rows = append(rows, Rate{
+			Rate:    cast.ToString(rawRate),
+			Fiat:    upperFiat,
+			Crypto:  string(CNYE),
+			RawRate: rawRate,
+		})
 	}
 
 	if len(rows) == 0 {
