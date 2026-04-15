@@ -115,8 +115,8 @@
         const config = getPaymentConfig();
 
         let token = (config.token || '--').toUpperCase();
-        let network = selectedMethod ? (selectedMethod.network || '--').toUpperCase() : '--';
-        let networkName = selectedMethod ? (selectedMethod.token_net_name || '--').toUpperCase() : '--';
+        let network = (config.network || '--').toUpperCase();
+        let networkName = (config.networkName || '--').toUpperCase();
 
         if (selectedMethod) {
             token = selectedMethod.currency.toUpperCase();
@@ -204,6 +204,36 @@
 
         // The logic for populating the list is in renderOptions,
         // but the event listener for global click is needed once.
+    }
+
+    function fetchPaymentMethods() {
+        fetch('/api/v1/pay/methods', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                trade_id: tradeId
+            })
+        })
+            .then(function (response) { return response.json(); })
+            .then(function (res) {
+                if (res.status_code === 200) {
+                    paymentMethods = res.data.methods;
+                    initSelection();
+                } else {
+                    // Suppress alert for expired orders
+                    if (res.status_code === 400 && (res.message && (res.message.includes('过期') || res.message.toLowerCase().includes('expired')))) {
+                        showTimeoutMessage();
+                        return;
+                    }
+                    showMessage(res.message || t('payment.loadMethodsFailed', 'Failed to load payment methods'));
+                }
+            })
+            .catch(function (err) {
+                console.error('API Error:', err);
+                showMessage(t('payment.networkError', 'Network error, please refresh'));
+            });
     }
 
     function initSelection() {
@@ -700,13 +730,7 @@
         }
 
         initI18n().then(function () {
-            if (paymentConfig.network && Array.isArray(paymentConfig.network) && paymentConfig.network.length > 0) {
-                paymentMethods = paymentConfig.network;
-                initSelection();
-            } else {
-                showMessage(t('payment.loadPaymentNetworkFailed', 'Failed to load payment network, please check if the wallet has been added'));
-            }
-
+            fetchPaymentMethods();
             startCountdown();
             // Poll status every 5s
             statusCheckTimer = setInterval(checkPaymentStatus, 5000);
