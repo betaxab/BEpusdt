@@ -183,6 +183,29 @@
             </a-input>
           </a-form-item>
         </template>
+        <template v-else-if="paidInfoTemplate === 'duolabaoQr'">
+          <a-form-item field="ref_hash" label="交易订单号（选填）" :rules="[{ maxLength: 128, message: '交易订单号不能超过128位' }]">
+            <a-input v-model="paidForm.ref_hash" placeholder="请输入交易订单号" allow-clear>
+              <template #prefix>
+                <icon-swap />
+              </template>
+            </a-input>
+          </a-form-item>
+          <a-form-item field="ref_from_info" label="付款方账号（选填）" :rules="[{ maxLength: 128, message: '付款方账号不能超过128个字符' }]">
+            <a-input v-model="paidForm.ref_from_info" placeholder="请输入付款方账号" allow-clear>
+              <template #prefix>
+                <icon-user />
+              </template>
+            </a-input>
+          </a-form-item>
+          <a-form-item field="ref_orderno" label="银行流水号（选填）" :rules="[{ maxLength: 128, message: '银行流水号不能超过128位' }]">
+            <a-input v-model="paidForm.ref_orderno" placeholder="请输入银行流水号" allow-clear>
+              <template #prefix>
+                <icon-swap />
+              </template>
+            </a-input>
+          </a-form-item>
+        </template>
         <template v-else-if="paidInfoTemplate === 'defaultChannel'">
           <a-form-item field="ref_hash" label="交易订单号（选填）" :rules="[{ maxLength: 128, message: '交易订单号不能超过128位' }]">
             <a-input v-model="paidForm.ref_hash" placeholder="请输入交易订单号" allow-clear>
@@ -365,10 +388,11 @@ const paidForm = reactive({
   recordId: 0
 });
 
-type PaidInfoTemplate = "alipayMck" | "defaultChannel" | "blockchain";
+type PaidInfoTemplate = "alipayMck" | "duolabaoQr" | "defaultChannel" | "blockchain";
 
 const paidInfoTemplateMap: Record<string, PaidInfoTemplate> = {
   "alipay.mck": "alipayMck",
+  "duolabao.qr": "duolabaoQr",
 };
 
 const paidInfoTemplate = computed<PaidInfoTemplate>(() => {
