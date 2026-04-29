@@ -21,6 +21,7 @@ var supportFiat = map[Fiat]struct{}{
 var supportCrypto = map[Crypto]CoinId{
 	USDT: "tether",
 	USDC: "usd-coin",
+	CNYE: "cnye-coin",
 	TRX:  "tron",
 	BNB:  "binancecoin",
 	ETH:  "ethereum",

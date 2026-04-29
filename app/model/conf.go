@@ -21,6 +21,7 @@ var defaultConf = map[ConfKey]string{
 	RateSyncInterval:        "3600",
 	AtomUSDT:                "0.01",
 	AtomUSDC:                "0.01",
+	AtomCNYE:                "0.01",
 	AtomTRX:                 "0.01",
 	AtomBNB:                 "0.00001",
 	AtomETH:                 "0.000001",

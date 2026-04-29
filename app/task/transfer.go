@@ -85,9 +85,50 @@ func orderTransferHandle(ctx context.Context) {
 			}
 
 			var other = make([]transfer, 0)
-			var orders = getReceivableOrders()
+			var orders, channelOrders = getReceivableOrders()
 
 			for _, t := range batch {
+				// 通道相关交易
+				if chOrders, ok := channelOrders[t.TradeType]; ok {
+					// 判断数额是否在允许范围内
+					if !model.IsAmountValid(t.TradeType, t.Amount) {
+						continue
+					}
+
+					var matched bool
+					for _, o := range chOrders {
+						// 金额前缀匹配
+						if !amountMatch(t.Amount, o.Amount, string(o.TradeType)) {
+							continue
+						}
+
+						if !o.CreatedAt.Before(t.Timestamp) || !o.ExpiredAt.After(t.Timestamp) {
+							continue
+						}
+
+						// Unique check: check if this alipay order no is already used
+						var count int64
+						model.Db.Model(&model.Order{}).Where("ref_hash = ?", t.TxHash).Count(&count)
+						if count > 0 {
+							log.Warn(fmt.Sprintf("Channel: order %s already used, skipping", t.TxHash))
+							continue
+						}
+
+						// 找到匹配的订单
+						o.MarkChannelConfirming(t.RecvAddress, t.FromAddress, t.TxHash, t.Timestamp)
+
+						log.Info(fmt.Sprintf("Channel: Order %s matched with trade %s", o.OrderId, t.TxHash))
+						matched = true
+						break
+					}
+
+					if !matched {
+						other = append(other, t)
+					}
+					continue
+				}
+
+				// 钱包相关交易
 				// 判断数额是否在允许范围内
 				if !model.IsAmountValid(t.TradeType, t.Amount) {
 					continue
@@ -263,7 +304,7 @@ func receivableOrderStatuses() []int {
 	return []int{model.OrderStatusWaiting, model.OrderStatusExpired}
 }
 
-func getReceivableOrders() map[string][]model.Order {
+func getReceivableOrders() (map[string][]model.Order, map[model.TradeType][]model.Order) {
 	var orders []model.Order
 	db := model.Db.Where("status in (?)", receivableOrderStatuses()).
 		Where("expired_at > ?", time.Now().Add(model.GetLookbackHour())).
@@ -271,12 +312,18 @@ func getReceivableOrders() map[string][]model.Order {
 	db.Find(&orders)
 
 	data := make(map[string][]model.Order)
+	channelData := make(map[model.TradeType][]model.Order)
+	configs := model.GetAllTradeConfig()
 	for _, t := range orders {
+		if c, ok := configs[string(t.TradeType)]; ok && c.TargetType == model.TargetTypeChannel {
+			channelData[t.TradeType] = append(channelData[t.TradeType], t)
+			continue
+		}
 		key := orderMatchAddress(t) + string(t.TradeType)
 		data[key] = append(data[key], t)
 	}
 
-	return data
+	return data, channelData
 }
 
 func hasLookbackOrders(tradeType []model.TradeType) bool {
