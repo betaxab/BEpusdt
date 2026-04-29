@@ -20,6 +20,8 @@ export interface Detail {
   notify_state: number;
   ref_hash: string;
   ref_block_num: number;
+  ref_orderno: string;
+  ref_from_info: string;
   expired_at: string;
   confirmed_at?: string;
   created_at?: string;
@@ -49,6 +51,8 @@ export const useOrderDetail = () => {
     notify_state: 0,
     ref_hash: "",
     ref_block_num: 0,
+    ref_orderno: "",
+    ref_from_info: "",
     expired_at: "",
     tx_url: ""
   });
@@ -90,6 +94,8 @@ export const useOrderDetail = () => {
       notify_state: 0,
       ref_hash: "",
       ref_block_num: 0,
+      ref_orderno: "",
+      ref_from_info: "",
       expired_at: "",
       tx_url: ""
     };

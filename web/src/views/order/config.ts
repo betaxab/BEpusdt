@@ -17,6 +17,8 @@ interface List {
   notify_state: number;
   ref_hash: string;
   ref_block_num: number;
+  ref_orderno: string;
+  ref_from_info: string;
   expired_at: string;
   confirmed_at?: string;
   created_at?: string;

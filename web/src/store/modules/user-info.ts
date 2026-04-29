@@ -23,6 +23,7 @@ const userInfoStore = () => {
   });
 
   const trade_type = ref<Record<string, string>>({});
+  const trade_type_config = ref<Record<string, any>>({});
   const trade_fiat = ref<string[]>([]);
   const trade_crypto = ref<string[]>([]);
   const trade_network = ref<Record<string, string>>({});
@@ -34,6 +35,7 @@ const userInfoStore = () => {
     // 确保返回的数据有效
     if (data && data.data) {
       trade_type.value = data.data.trade_type || {};
+      trade_type_config.value = data.data.trade_type_config || {};
       trade_fiat.value = data.data.trade_fiat || [];
       trade_crypto.value = data.data.trade_crypto || [];
       trade_network.value = data.data.trade_network || {};
@@ -58,7 +60,7 @@ const userInfoStore = () => {
     token.value = "";
   }
 
-  return { account, token, setAccount, setToken, logOut, trade_type, trade_fiat, trade_crypto, trade_network, admin_username };
+  return { account, token, setAccount, setToken, logOut, trade_type, trade_type_config, trade_fiat, trade_crypto, trade_network, admin_username };
 };
 
 export const useUserInfoStore = defineStore("user-info", userInfoStore, {

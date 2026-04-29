@@ -31,11 +31,11 @@ type authPasswordReq struct {
 
 func (Auth) Info(ctx *gin.Context) {
 	base.Ok(ctx, gin.H{
-		"admin_username": model.GetK(model.AdminUsername),
-		"trade_type":     model.GetAllAlias(),
-		"trade_fiat":     model.GetSupportFiat(),
-		"trade_crypto":   model.GetSupportCrypto(),
-		"trade_network":  model.GetAllNetwork(),
+		"admin_username":    model.GetK(model.AdminUsername),
+		"trade_type":        model.GetAllAlias(),
+		"trade_type_config": model.GetAllTradeConfig(),
+		"trade_fiat":        model.GetSupportFiat(),
+		"trade_crypto":      model.GetSupportCrypto(),
 	})
 }
 
@@ -112,6 +112,28 @@ func (Auth) Menu(ctx *gin.Context) {
 		},
 		{
 			Id:        "03",
+			Path:      "/channel",
+			Name:      "channel",
+			Component: "channel/channel",
+			Meta: meta{
+				Title:     "channel",
+				Hide:      false,
+				Disable:   false,
+				KeepAlive: true,
+				Affix:     false,
+				Link:      "",
+				Iframe:    false,
+				IsFull:    false,
+				Roles:     []string{"admin"},
+				SvgIcon:   "functions",
+				Icon:      "",
+				Sort:      1,
+				Type:      2,
+			},
+			Children: nil,
+		},
+		{
+			Id:        "04",
 			Path:      "/order",
 			Name:      "order",
 			Component: "order/order",
@@ -133,7 +155,7 @@ func (Auth) Menu(ctx *gin.Context) {
 			Children: nil,
 		},
 		{
-			Id:        "04",
+			Id:        "05",
 			Path:      "/rate",
 			Name:      "rate",
 			Component: "rate/rate",
@@ -154,8 +176,8 @@ func (Auth) Menu(ctx *gin.Context) {
 			},
 			Children: []menu{
 				{
-					Id:        "0401",
-					ParentId:  "04",
+					Id:        "0501",
+					ParentId:  "05",
 					Path:      "/rate/list",
 					Name:      "rate-list",
 					Component: "rate/list",
@@ -177,8 +199,8 @@ func (Auth) Menu(ctx *gin.Context) {
 					Children: nil,
 				},
 				{
-					Id:        "0402",
-					ParentId:  "04",
+					Id:        "0502",
+					ParentId:  "05",
 					Path:      "/rate/syntax",
 					Name:      "rate-syntax",
 					Component: "rate/syntax",
@@ -202,7 +224,7 @@ func (Auth) Menu(ctx *gin.Context) {
 			},
 		},
 		{
-			Id:        "05",
+			Id:        "06",
 			Path:      "/system",
 			Name:      "system",
 			Component: "system/system",
@@ -223,8 +245,8 @@ func (Auth) Menu(ctx *gin.Context) {
 			},
 			Children: []menu{
 				{
-					Id:        "0501",
-					ParentId:  "05",
+					Id:        "0601",
+					ParentId:  "06",
 					Path:      "/system/base/base",
 					Name:      "system-base",
 					Component: "system/base/base",
@@ -246,8 +268,8 @@ func (Auth) Menu(ctx *gin.Context) {
 					Children: nil,
 				},
 				{
-					Id:        "0502",
-					ParentId:  "05",
+					Id:        "0602",
+					ParentId:  "06",
 					Path:      "/system/rpc/rpc",
 					Name:      "system-rpc",
 					Component: "system/rpc/rpc",
@@ -271,7 +293,7 @@ func (Auth) Menu(ctx *gin.Context) {
 			},
 		},
 		{
-			Id:        "06",
+			Id:        "07",
 			Path:      "/create-order",
 			Name:      "create-order",
 			Component: "order/create-order",
@@ -293,7 +315,7 @@ func (Auth) Menu(ctx *gin.Context) {
 			Children: nil,
 		},
 		{
-			Id:        "07",
+			Id:        "08",
 			Path:      "/github-api-doc",
 			Name:      "github-api-doc",
 			Component: "about/doc",

@@ -190,7 +190,7 @@
       </a-card>
 
       <!-- 区块链信息卡片 -->
-      <a-card class="detail-card" title="区块链数据" :bordered="false" v-if="detailData.status === 2 || detailData.status === 5">
+      <a-card class="detail-card" title="区块链数据" :bordered="false" v-if="(detailData.status === 2 || detailData.status === 5) && userStores.trade_type_config[detailData.trade_type]?.TargetType !== 1">
         <a-row :gutter="24" v-if="detailData.ref_hash">
           <a-col :xs="24" :sm="24" :md="12" v-if="detailData.ref_block_num">
             <div class="detail-item">
@@ -273,6 +273,8 @@ import { cancelOrderAPI, delOrderApi, manualNotifyAPI } from "@/api/modules/orde
 import { Notification, Modal } from "@arco-design/web-vue";
 import { useLayoutModel } from "@/hooks/useLayoutModel";
 
+import { useUserInfoStore } from "@/store/modules/user-info";
+
 const props = defineProps({
   visible: Boolean,
   detailData: {
@@ -283,6 +285,8 @@ const props = defineProps({
 
 const { dialogWidth } = useLayoutModel();
 const detailDialogWidth = computed(() => dialogWidth("820px"));
+
+const userStores = useUserInfoStore();
 
 const emits = defineEmits(["close", "refresh"]);
 

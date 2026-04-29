@@ -152,6 +152,17 @@ func BuildTrade(p OrderParams) (Trade, error) {
 	}
 
 	var wallets = GetAvailableWallets(p.TradeType)
+	if registry[p.TradeType].TargetType == TargetTypeChannel {
+		channels := GetAvailableChannel(p.TradeType)
+		wallets = make([]Wallet, 0, len(channels))
+		for _, channel := range channels {
+			wallets = append(wallets, Wallet{
+				Address:   channel,
+				MatchAddr: channel,
+				TradeType: string(p.TradeType),
+			})
+		}
+	}
 	if p.Address != "" { // 指定地址
 		w, err := NewWallet(p.Address, p.TradeType)
 		if err != nil {
