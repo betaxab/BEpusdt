@@ -5,6 +5,7 @@ import (
 
 	"github.com/v03413/bepusdt/app/model"
 	"github.com/v03413/bepusdt/app/payment/alipaymck"
+	"github.com/v03413/bepusdt/app/payment/duolabao"
 )
 
 func validateChannel(channel *model.Channel) error {
@@ -23,6 +24,14 @@ func validateChannel(channel *model.Channel) error {
 			return fmt.Errorf("配置格式错误: %v", err)
 		}
 		if err := alipaymck.ValidateConfig(config); err != nil {
+			return fmt.Errorf("配置校验错误: %v", err)
+		}
+	case model.DuolabaoQr:
+		config, err := duolabao.ParseConfigText(channel.Config)
+		if err != nil {
+			return fmt.Errorf("配置格式错误: %v", err)
+		}
+		if err := duolabao.ValidateConfig(config); err != nil {
 			return fmt.Errorf("配置校验错误: %v", err)
 		}
 	}
