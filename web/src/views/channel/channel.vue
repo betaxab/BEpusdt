@@ -98,18 +98,40 @@
           </a-option>
         </a-select>
       </a-form-item>
-      <a-form-item field="qrcode" label="二维码地址" validate-trigger="blur">
-        <a-input v-model="addFrom.qrcode" placeholder="请输入二维码地址" allow-clear />
-      </a-form-item>
-      <a-form-item field="config" label="配置" validate-trigger="blur">
-        <a-input v-model="addFrom.config" placeholder="请输入配置" allow-clear />
-      </a-form-item>
-      <a-form-item field="other_notify" label="其他通知">
-        <a-select v-model="addFrom.other_notify" placeholder="请选择" allow-clear>
-          <a-option :value="0">关闭</a-option>
-          <a-option :value="1">启用</a-option>
-        </a-select>
-      </a-form-item>
+      <template v-if="addChannelFormTemplate === 'defaultChannel'">
+        <a-form-item field="qrcode" label="二维码地址" validate-trigger="blur">
+          <a-input v-model="addFrom.qrcode" placeholder="请输入二维码地址" allow-clear />
+        </a-form-item>
+        <a-form-item field="config" label="配置" validate-trigger="blur">
+          <a-input v-model="addFrom.config" placeholder="请输入配置" allow-clear />
+        </a-form-item>
+        <a-form-item field="other_notify" label="其他通知">
+          <a-select v-model="addFrom.other_notify" placeholder="请选择" allow-clear>
+            <a-option :value="0">关闭</a-option>
+            <a-option :value="1">启用</a-option>
+          </a-select>
+        </a-form-item>
+      </template>
+      <template v-else-if="addChannelFormTemplate === 'alipayMck'">
+        <a-form-item field="qrcode" label="二维码地址" validate-trigger="blur">
+          <a-input v-model="addFrom.qrcode" placeholder="请输入二维码地址" allow-clear />
+        </a-form-item>
+        <a-form-item label="AppId" required>
+          <a-input v-model="alipayConfig.appid" placeholder="请输入AppId" allow-clear />
+        </a-form-item>
+        <a-form-item label="公钥" required>
+          <a-textarea v-model="alipayConfig.publickey" placeholder="请输入公钥" allow-clear />
+        </a-form-item>
+        <a-form-item label="私钥" required>
+          <a-textarea v-model="alipayConfig.privatekey" placeholder="请输入私钥" allow-clear />
+        </a-form-item>
+        <a-form-item field="other_notify" label="其他通知">
+          <a-select v-model="addFrom.other_notify" placeholder="请选择" allow-clear>
+            <a-option :value="0">关闭</a-option>
+            <a-option :value="1">启用</a-option>
+          </a-select>
+        </a-form-item>
+      </template>
       <a-form-item field="remark" label="备注信息" validate-trigger="blur">
         <a-textarea v-model="addFrom.remark" placeholder="请输入备注信息" allow-clear />
       </a-form-item>
@@ -123,18 +145,40 @@
       <a-form-item field="name" label="通道名称" validate-trigger="blur">
         <a-input v-model="modFrom.name" placeholder="请输入通道名称" allow-clear />
       </a-form-item>
-      <a-form-item field="qrcode" label="二维码地址" validate-trigger="blur">
-        <a-input v-model="modFrom.qrcode" placeholder="请输入二维码地址" allow-clear />
-      </a-form-item>
-      <a-form-item field="config" label="配置" validate-trigger="blur">
-        <a-input v-model="modFrom.config" placeholder="请输入配置" allow-clear />
-      </a-form-item>
-      <a-form-item field="other_notify" label="其他通知">
-        <a-select v-model="modFrom.other_notify" placeholder="请选择" allow-clear>
-          <a-option :value="0">关闭</a-option>
-          <a-option :value="1">开启</a-option>
-        </a-select>
-      </a-form-item>
+      <template v-if="modChannelFormTemplate === 'defaultChannel'">
+        <a-form-item field="qrcode" label="二维码地址" validate-trigger="blur">
+          <a-input v-model="modFrom.qrcode" placeholder="请输入二维码地址" allow-clear />
+        </a-form-item>
+        <a-form-item field="config" label="配置" validate-trigger="blur">
+          <a-input v-model="modFrom.config" placeholder="请输入配置" allow-clear />
+        </a-form-item>
+        <a-form-item field="other_notify" label="其他通知">
+          <a-select v-model="modFrom.other_notify" placeholder="请选择" allow-clear>
+            <a-option :value="0">关闭</a-option>
+            <a-option :value="1">开启</a-option>
+          </a-select>
+        </a-form-item>
+      </template>
+      <template v-else-if="modChannelFormTemplate === 'alipayMck'">
+        <a-form-item field="qrcode" label="二维码地址" validate-trigger="blur">
+          <a-input v-model="modFrom.qrcode" placeholder="请输入二维码地址" allow-clear />
+        </a-form-item>
+        <a-form-item label="AppId" required>
+          <a-input v-model="alipayConfig.appid" placeholder="请输入AppId" allow-clear />
+        </a-form-item>
+        <a-form-item label="公钥" required>
+          <a-textarea v-model="alipayConfig.publickey" placeholder="请输入公钥" allow-clear />
+        </a-form-item>
+        <a-form-item label="私钥" required>
+          <a-textarea v-model="alipayConfig.privatekey" placeholder="请输入私钥" allow-clear />
+        </a-form-item>
+        <a-form-item field="other_notify" label="其他通知">
+          <a-select v-model="modFrom.other_notify" placeholder="请选择" allow-clear>
+            <a-option :value="0">关闭</a-option>
+            <a-option :value="1">开启</a-option>
+          </a-select>
+        </a-form-item>
+      </template>
       <a-form-item field="trade_type" label="交易类型" :rules="[{ required: true, message: '交易类型不能为空' }]">
         <a-select v-model="modFrom.trade_type" placeholder="请选择" allow-clear allow-search>
           <a-option v-for="item in tradeTypeOptions" :key="item.value" :value="item.value">
@@ -299,8 +343,51 @@ const formData = reactive<FormData>({
   search: false
 });
 
+const createDefaultAlipayConfig = () => ({
+  appid: "",
+  publickey: "",
+  privatekey: ""
+});
+
+const alipayConfig = ref(createDefaultAlipayConfig());
+
+const resetChannelConfigs = () => {
+  alipayConfig.value = createDefaultAlipayConfig();
+};
+
+const parseJsonConfig = (configText?: string) => {
+  try {
+    return configText ? JSON.parse(configText) : {};
+  } catch (e) {
+    console.error("解析配置失败", e);
+    return {};
+  }
+};
+
 const channelQrcodeText = (record: List) => {
   return record.qrcode || "";
+};
+
+type ChannelForm = AddForm | ModForm;
+type ChannelFormHandler = (form: ChannelForm) => boolean;
+
+const applyAlipayChannelForm = (form: ChannelForm) => {
+  if (!alipayConfig.value.appid || !alipayConfig.value.publickey || !alipayConfig.value.privatekey) {
+    Notification.error("请完善配置信息");
+    return false;
+  }
+
+  form.config = JSON.stringify(alipayConfig.value);
+  return true;
+};
+
+const channelFormHandlers: Record<string, ChannelFormHandler> = {
+  "alipay.mck": applyAlipayChannelForm,
+};
+
+const applyChannelForm = (form: ChannelForm) => {
+  const handler = channelFormHandlers[form.trade_type];
+  return handler ? handler(form) : true;
 };
 
 const selectedKeys = ref<string[]>([]);
@@ -357,6 +444,19 @@ const modFrom = ref<ModForm>({
   other_notify: 0,
   status: 1
 });
+
+type ChannelFormTemplate = "alipayMck" | "defaultChannel";
+
+const channelFormTemplateMap: Record<string, ChannelFormTemplate> = {
+  "alipay.mck": "alipayMck",
+};
+
+const resolveChannelFormTemplate = (tradeType?: string): ChannelFormTemplate => {
+  return channelFormTemplateMap[tradeType || ""] || "defaultChannel";
+};
+
+const addChannelFormTemplate = computed(() => resolveChannelFormTemplate(addFrom.value.trade_type));
+const modChannelFormTemplate = computed(() => resolveChannelFormTemplate(modFrom.value.trade_type));
 
 const pageChange = (page: number) => {
   pagination.value.current = page;
@@ -423,6 +523,20 @@ const onMod = (record: List) => {
     status: record.status
   };
   modOpen.value = true;
+
+  const config = parseJsonConfig(record.config);
+  resetChannelConfigs();
+  switch (record.trade_type) {
+    case "alipay.mck":
+      alipayConfig.value = {
+        appid: config.appid || "",
+        publickey: config.publickey || "",
+        privatekey: config.privatekey || ""
+      };
+      break;
+    default:
+      break;
+  }
 };
 
 const afterClose = () => {
@@ -435,6 +549,7 @@ const afterClose = () => {
     remark: "",
     other_notify: 0
   };
+  resetChannelConfigs();
 };
 
 const afterModClose = () => {
@@ -449,9 +564,14 @@ const afterModClose = () => {
     other_notify: 0,
     status: 1
   };
+  resetChannelConfigs();
 };
 
 const addChannel = async () => {
+  if (!applyChannelForm(addFrom.value)) {
+    return;
+  }
+
   const state = await formRef.value.validate();
   if (state) return;
 
@@ -470,6 +590,10 @@ const addChannel = async () => {
 };
 
 const modChannel = async () => {
+  if (!applyChannelForm(modFrom.value)) {
+    return;
+  }
+
   const state = await modFormRef.value.validate();
   if (state) return;
 

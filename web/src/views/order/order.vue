@@ -160,16 +160,64 @@
       </a-alert>
 
       <a-form :model="paidForm" layout="vertical">
-        <a-form-item field="ref_hash" label="交易哈希" :rules="[{ maxLength: 200, message: '哈希值不能超过200个字符' }]">
-          <a-input v-model="paidForm.ref_hash" placeholder="请输入区块链交易哈希值(可选)" allow-clear>
-            <template #prefix>
-              <icon-link />
+        <template v-if="paidInfoTemplate === 'alipayMck'">
+          <a-form-item field="ref_hash" label="交易订单号（选填）" :rules="[{ maxLength: 128, message: '交易订单号不能超过128位' }]">
+            <a-input v-model="paidForm.ref_hash" placeholder="请输入交易订单号" allow-clear>
+              <template #prefix>
+                <icon-swap />
+              </template>
+            </a-input>
+          </a-form-item>
+          <a-form-item field="ref_from_info" label="付款方账号（选填）" :rules="[{ maxLength: 128, message: '付款方账号不能超过128个字符' }]">
+            <a-input v-model="paidForm.ref_from_info" placeholder="请输入付款方账号" allow-clear>
+              <template #prefix>
+                <icon-user />
+              </template>
+            </a-input>
+          </a-form-item>
+          <a-form-item field="ref_orderno" label="商家订单号（选填）" :rules="[{ maxLength: 128, message: '商家订单号不能超过128位' }]">
+            <a-input v-model="paidForm.ref_orderno" placeholder="请输入商家订单号" allow-clear>
+              <template #prefix>
+                <icon-swap />
+              </template>
+            </a-input>
+          </a-form-item>
+        </template>
+        <template v-else-if="paidInfoTemplate === 'defaultChannel'">
+          <a-form-item field="ref_hash" label="交易订单号（选填）" :rules="[{ maxLength: 128, message: '交易订单号不能超过128位' }]">
+            <a-input v-model="paidForm.ref_hash" placeholder="请输入交易订单号" allow-clear>
+              <template #prefix>
+                <icon-swap />
+              </template>
+            </a-input>
+          </a-form-item>
+          <a-form-item field="ref_orderno" label="商家订单号（选填）" :rules="[{ maxLength: 128, message: '交易订单号不能超过128位' }]">
+            <a-input v-model="paidForm.ref_orderno" placeholder="请输入商家订单号" allow-clear>
+              <template #prefix>
+                <icon-swap />
+              </template>
+            </a-input>
+          </a-form-item>
+          <a-form-item field="ref_from_info" label="付款方账号（选填）" :rules="[{ maxLength: 128, message: '付款方账号不能超过128个字符' }]">
+            <a-input v-model="paidForm.ref_from_info" placeholder="请输入付款方账号" allow-clear>
+              <template #prefix>
+                <icon-user />
+              </template>
+            </a-input>
+          </a-form-item>
+        </template>
+        <template v-else>
+          <a-form-item field="ref_hash" label="交易哈希" :rules="[{ maxLength: 200, message: '哈希值不能超过200个字符' }]">
+            <a-input v-model="paidForm.ref_hash" placeholder="请输入区块链交易哈希值(可选)" allow-clear>
+              <template #prefix>
+                <icon-link />
+              </template>
+            </a-input>
+            <template #extra>
+              <div style="font-size: 12px; color: #86909c; margin-top: 4px">如有实际交易,建议填写对应的区块链交易哈希值</div>
             </template>
-          </a-input>
-          <template #extra>
-            <div style="font-size: 12px; color: #86909c; margin-top: 4px">如有实际交易,建议填写对应的区块链交易哈希值</div>
-          </template>
-        </a-form-item>
+          </a-form-item>
+        </template>
       </a-form>
     </div>
   </a-modal>
@@ -315,6 +363,23 @@ const paidForm = reactive({
   ref_from_info: "",
   trade_type: "",
   recordId: 0
+});
+
+type PaidInfoTemplate = "alipayMck" | "defaultChannel" | "blockchain";
+
+const paidInfoTemplateMap: Record<string, PaidInfoTemplate> = {
+  "alipay.mck": "alipayMck",
+};
+
+const paidInfoTemplate = computed<PaidInfoTemplate>(() => {
+  const tradeType = paidForm.trade_type;
+  if (paidInfoTemplateMap[tradeType]) {
+    return paidInfoTemplateMap[tradeType];
+  }
+  if (userStores.trade_type_config[tradeType]?.TargetType === 1) {
+    return "defaultChannel";
+  }
+  return "blockchain";
 });
 
 const showPaidModal = (record: List) => {

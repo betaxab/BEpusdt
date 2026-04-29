@@ -178,6 +178,69 @@
         </a-row>
       </a-card>
 
+      <!-- 交易信息卡片 -->
+      <a-card
+        class="detail-card"
+        title="交易信息"
+        :bordered="false"
+        v-if="(detailData.status === 2 || detailData.status === 5) && userStores.trade_type_config[detailData.trade_type]?.TargetType === 1"
+      >
+        <template v-else-if="tradeInfoTemplate === 'alipayMck'">
+          <a-row :gutter="24">
+            <a-col :span="12" v-if="detailData.ref_hash">
+              <div class="detail-item">
+                <div class="detail-label">
+                  <icon-swap />
+                  <span>交易订单号</span>
+                </div>
+                <div class="detail-value">{{ detailData.ref_hash }}</div>
+              </div>
+            </a-col>
+            <a-col :span="12" v-if="detailData.ref_from_info">
+              <div class="detail-item">
+                <div class="detail-label">
+                  <icon-user />
+                  <span>付款方账号</span>
+                </div>
+                <div class="detail-value">{{ detailData.ref_from_info }}</div>
+              </div>
+            </a-col>
+          </a-row>
+          <a-row :gutter="24">
+            <a-col :span="12" v-if="detailData.ref_orderno">
+              <div class="detail-item">
+                <div class="detail-label">
+                  <icon-file />
+                  <span>商家订单号</span>
+                </div>
+                <div class="detail-value">{{ detailData.ref_orderno }}</div>
+              </div>
+            </a-col>
+          </a-row>
+        </template>
+        <!-- 默认卡片信息 -->
+        <a-row v-else :gutter="24">
+          <a-col :span="12" v-if="detailData.ref_orderno">
+            <div class="detail-item">
+              <div class="detail-label">
+                <icon-swap />
+                <span>交易订单号</span>
+              </div>
+              <div class="detail-value">{{ detailData.ref_orderno }}</div>
+            </div>
+          </a-col>
+          <a-col :span="12" v-if="detailData.ref_from_info">
+            <div class="detail-item">
+              <div class="detail-label">
+                <icon-user />
+                <span>付款方账号</span>
+              </div>
+              <div class="detail-value">{{ detailData.ref_from_info }}</div>
+            </div>
+          </a-col>
+        </a-row>
+      </a-card>
+
       <!-- 区块链信息卡片 -->
       <a-card class="detail-card" title="区块链数据" :bordered="false" v-if="(detailData.status === 2 || detailData.status === 5) && userStores.trade_type_config[detailData.trade_type]?.TargetType !== 1">
         <a-row :gutter="24" v-if="detailData.ref_hash">
@@ -276,6 +339,14 @@ const userStores = useUserInfoStore();
 const emits = defineEmits(["close", "refresh"]);
 
 const onClose = () => emits("close");
+
+type TradeInfoTemplate = "alipayMck" | "defaultChannel";
+
+const tradeInfoTemplateMap: Record<string, TradeInfoTemplate> = {
+  "alipay.mck": "alipayMck",
+};
+
+const tradeInfoTemplate = computed<TradeInfoTemplate>(() => tradeInfoTemplateMap[props.detailData.trade_type] || "defaultChannel");
 
 const openTxUrl = () => {
   if (props.detailData.tx_url) {
