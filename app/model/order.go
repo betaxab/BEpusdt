@@ -21,6 +21,7 @@ const (
 	OrderStatusConfirming = 5 // 等待交易确认
 	OrderStatusFailed     = 6 // 交易确认失败
 
+	AlipayMck  TradeType = "alipay.mck"
 	BscBnb      TradeType = "bsc.bnb"
 	EthereumEth TradeType = "ethereum.eth"
 	TronTrx     TradeType = "tron.trx"
