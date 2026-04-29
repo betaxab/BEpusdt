@@ -9,23 +9,30 @@ type Crypto string
 type TradeType string
 type MatchMode string
 type Network string
+type TargetType uint8
 type Range struct {
 	MinAmount decimal.Decimal
 	MaxAmount decimal.Decimal
 }
 type TradeTypeConf struct {
-	Alias        string  // 类型别名，主要用户前端展示
-	NetworkName  string  // 网络名称，用于前端展示
-	Network      Network // 所属区块链网络
-	Crypto       Crypto  // 币种类型
-	Native       bool    // 是否原生币
-	Contract     string  // 合约地址，原生币为空
-	Decimal      int32   // 小数位
-	AmountRange  Range   // 合法数额范围；这里特指则扫块时[数额范围]，目前偷懒全部写死一个大概合理的范围，后面有问题再说...
-	ExplorerFmt  string  // 区块浏览器交易链接格式化字符串，%s 位置替换为交易哈希
-	EndpointKey  ConfKey // RPC 端点配置键
-	AddrCaseSens bool    // 钱包地址是否大小写敏感，如果为 false 则会统一转为小写比较
+	Alias        string     // 类型别名，主要用户前端展示
+	NetworkName  string     // 网络名称，用于前端展示
+	Network      Network    // 所属区块链网络
+	Crypto       Crypto     // 币种类型
+	Native       bool       // 是否原生币
+	Contract     string     // 合约地址，原生币为空
+	Decimal      int32      // 小数位
+	AmountRange  Range      // 合法数额范围；这里特指则扫块时[数额范围]，目前偷懒全部写死一个大概合理的范围，后面有问题再说...
+	ExplorerFmt  string     // 区块浏览器交易链接格式化字符串，%s 位置替换为交易哈希
+	EndpointKey  ConfKey    // RPC 端点配置键
+	AddrCaseSens bool       // 钱包地址是否大小写敏感，如果为 false 则会统一转为小写比较
+	TargetType   TargetType // 目标类型：0-钱包，1-通道
 }
+
+const (
+	TargetTypeWallet  TargetType = 0
+	TargetTypeChannel TargetType = 1
+)
 
 const (
 	AdminUsername ConfKey = "admin_username"
@@ -40,6 +47,7 @@ const (
 
 	AtomUSDT ConfKey = "atom_usdt"
 	AtomUSDC ConfKey = "atom_usdc"
+	AtomCNYE ConfKey = "atom_cnye"
 	AtomTRX  ConfKey = "atom_trx"
 	AtomBNB  ConfKey = "atom_bnb"
 	AtomETH  ConfKey = "atom_eth"
@@ -95,6 +103,7 @@ const (
 const (
 	USDT Crypto = "USDT"
 	USDC Crypto = "USDC"
+	CNYE Crypto = "CNYE"
 	TRX  Crypto = "TRX"
 	BNB  Crypto = "BNB"
 	ETH  Crypto = "ETH"

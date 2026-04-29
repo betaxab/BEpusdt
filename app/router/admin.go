@@ -28,6 +28,15 @@ func adminInit(e *gin.Engine) {
 		PostRegister(walletRtr, "/del", true, walletHdr.Del)
 	}
 
+	var channelRtr = e.Group("/api/channel")
+	var channelHdr = new(admin.Channel)
+	{
+		PostRegister(channelRtr, "/add", true, channelHdr.Add)
+		PostRegister(channelRtr, "/list", true, channelHdr.List)
+		PostRegister(channelRtr, "/mod", true, channelHdr.Mod)
+		PostRegister(channelRtr, "/del", true, channelHdr.Del)
+	}
+
 	var orderRtr = e.Group("/api/order")
 	var orderHdr = new(admin.Order)
 	{

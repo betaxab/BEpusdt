@@ -1,16 +1,17 @@
 <template>
   <div class="snow-page">
     <div class="snow-inner">
+      <!-- 查询表单 -->
       <a-form ref="formRef" auto-label-width :model="formData.form">
         <a-row :gutter="16">
           <a-col :xs="24" :sm="24" :md="12" :lg="12" :xl="6" :xxl="6">
-            <a-form-item field="name" label="钱包名称">
+            <a-form-item field="name" label="通道名称">
               <a-input v-model="formData.form.name" placeholder="请输入名称" allow-clear />
             </a-form-item>
           </a-col>
           <a-col :xs="24" :sm="24" :md="12" :lg="12" :xl="6" :xxl="6">
-            <a-form-item field="qrcode" label="钱包地址">
-              <a-input v-model="formData.form.address" placeholder="请输入钱包地址" allow-clear />
+            <a-form-item field="qrcode" label="二维码链接">
+              <a-input v-model="formData.form.qrcode" placeholder="请输入解码后的二维码链接" allow-clear />
             </a-form-item>
           </a-col>
           <a-col :xs="24" :sm="24" :md="12" :lg="12" :xl="6" :xxl="6">
@@ -34,7 +35,7 @@
               </a-button>
               <a-button type="primary" status="success" @click="onAdd">
                 <template #icon><icon-plus /></template>
-                新增钱包
+                新增通道
               </a-button>
             </a-space>
           </a-col>
@@ -54,10 +55,10 @@
         @page-change="pageChange"
         @page-size-change="pageSizeChange"
       >
-        <template #address="{ record }">
-          <div class="address-cell">
-            <a-typography-text copyable class="address-text">
-              {{ record.address }}
+        <template #qrcode="{ record }">
+          <div class="qrcode-cell">
+            <a-typography-text copyable class="qrcode-text">
+              {{ channelQrcodeText(record) }}
             </a-typography-text>
           </div>
         </template>
@@ -87,15 +88,12 @@
     </div>
   </div>
 
-  <!-- 新增钱包对话框 -->
-  <a-modal :width="formDialogWidth" v-model:visible="open" @close="afterClose" @ok="addWallet" @cancel="afterClose">
+  <!-- 新增通道对话框 -->
+  <a-modal :width="formDialogWidth" v-model:visible="open" @close="afterClose" @ok="addChannel" @cancel="afterClose">
     <template #title>{{ title }}</template>
     <a-form ref="formRef" auto-label-width :layout="formLayout" :rules="rules" :model="addFrom">
-      <a-form-item field="name" label="钱包名称" validate-trigger="blur">
-        <a-input v-model="addFrom.name" placeholder="请输入钱包名称" allow-clear />
-      </a-form-item>
-      <a-form-item field="address" label="钱包地址" validate-trigger="blur">
-        <a-input v-model="addFrom.address" placeholder="请输入钱包地址" allow-clear />
+      <a-form-item field="name" label="通道名称" validate-trigger="blur">
+        <a-input v-model="addFrom.name" placeholder="请输入通道名称" allow-clear />
       </a-form-item>
       <a-form-item field="trade_type" label="交易类型" :rules="[{ required: true, message: '交易类型不能为空' }]">
         <a-select v-model="addFrom.trade_type" placeholder="请选择" allow-clear allow-search>
@@ -103,6 +101,12 @@
             {{ item.label }}
           </a-option>
         </a-select>
+      </a-form-item>
+      <a-form-item field="qrcode" label="二维码地址" validate-trigger="blur">
+        <a-input v-model="addFrom.qrcode" placeholder="请输入二维码地址" allow-clear />
+      </a-form-item>
+      <a-form-item field="config" label="配置" validate-trigger="blur">
+        <a-input v-model="addFrom.config" placeholder="请输入配置" allow-clear />
       </a-form-item>
       <a-form-item field="other_notify" label="其他通知">
         <a-select v-model="addFrom.other_notify" placeholder="请选择" allow-clear>
@@ -116,15 +120,24 @@
     </a-form>
   </a-modal>
 
-  <!-- 修改钱包对话框 -->
-  <a-modal :width="formDialogWidth" v-model:visible="modOpen" @close="afterModClose" @ok="modWallet" @cancel="afterModClose">
+  <!-- 修改通道对话框 -->
+  <a-modal :width="formDialogWidth" v-model:visible="modOpen" @close="afterModClose" @ok="modChannel" @cancel="afterModClose">
     <template #title>{{ modTitle }}</template>
     <a-form ref="modFormRef" auto-label-width :layout="formLayout" :rules="rules" :model="modFrom">
-      <a-form-item field="name" label="钱包名称" validate-trigger="blur">
-        <a-input v-model="modFrom.name" placeholder="请输入钱包名称" allow-clear />
+      <a-form-item field="name" label="通道名称" validate-trigger="blur">
+        <a-input v-model="modFrom.name" placeholder="请输入通道名称" allow-clear />
       </a-form-item>
-      <a-form-item field="address" label="钱包地址" validate-trigger="blur">
-        <a-input v-model="modFrom.address" placeholder="请输入钱包地址" allow-clear />
+      <a-form-item field="qrcode" label="二维码地址" validate-trigger="blur">
+        <a-input v-model="modFrom.qrcode" placeholder="请输入二维码地址" allow-clear />
+      </a-form-item>
+      <a-form-item field="config" label="配置" validate-trigger="blur">
+        <a-input v-model="modFrom.config" placeholder="请输入配置" allow-clear />
+      </a-form-item>
+      <a-form-item field="other_notify" label="其他通知">
+        <a-select v-model="modFrom.other_notify" placeholder="请选择" allow-clear>
+          <a-option :value="0">关闭</a-option>
+          <a-option :value="1">开启</a-option>
+        </a-select>
       </a-form-item>
       <a-form-item field="trade_type" label="交易类型" :rules="[{ required: true, message: '交易类型不能为空' }]">
         <a-select v-model="modFrom.trade_type" placeholder="请选择" allow-clear allow-search>
@@ -137,12 +150,6 @@
         <a-select v-model="modFrom.status" placeholder="请选择" allow-clear>
           <a-option :value="1">启用</a-option>
           <a-option :value="0">停用</a-option>
-        </a-select>
-      </a-form-item>
-      <a-form-item field="other_notify" label="其他通知">
-        <a-select v-model="modFrom.other_notify" placeholder="请选择" allow-clear>
-          <a-option :value="0">关闭</a-option>
-          <a-option :value="1">开启</a-option>
         </a-select>
       </a-form-item>
       <a-form-item field="remark" label="备注信息" validate-trigger="blur">
@@ -163,7 +170,7 @@
     <template #title>
       <div class="detail-modal-title">
         <icon-star />
-        <span>钱包详情信息</span>
+        <span>通道详情信息</span>
       </div>
     </template>
 
@@ -182,7 +189,7 @@
             <div class="detail-item">
               <div class="detail-label">
                 <icon-idcard />
-                <span>钱包ID</span>
+                <span>通道ID</span>
               </div>
               <div class="detail-value">{{ detailData.id }}</div>
             </div>
@@ -191,7 +198,7 @@
             <div class="detail-item">
               <div class="detail-label">
                 <icon-user />
-                <span>钱包名称</span>
+                <span>通道名称</span>
               </div>
               <div class="detail-value">{{ detailData.name }}</div>
             </div>
@@ -203,10 +210,10 @@
             <div class="detail-item">
               <div class="detail-label">
                 <icon-location />
-                <span>钱包地址</span>
+                <span>二维码地址</span>
               </div>
               <div class="detail-value address-value">
-                <a-typography-text copyable>{{ detailData.address }}</a-typography-text>
+                <a-typography-text copyable>{{ detailData.qrcode }}</a-typography-text>
               </div>
             </div>
           </a-col>
@@ -276,29 +283,33 @@
 </template>
 
 <script setup lang="ts">
-import { getWalletListAPI, delWalletAPI, addWalletAPI, modWalletAPI } from "@/api/modules/wallet/index";
+import { getChannelListAPI, delChannelAPI, addChannelAPI, modChannelAPI } from "@/api/modules/channel/index";
 import { List, FormData, Pagination, AddForm, ModForm } from "./config";
 import { Notification } from "@arco-design/web-vue";
 import { useUserInfoStore } from "@/store/modules/user-info";
-import { useWalletDetail } from "./detail";
+import { useChannelDetail } from "./detail";
 import { useLayoutModel } from "@/hooks/useLayoutModel";
 
 const userStores = useUserInfoStore();
-const { detailVisible, detailData, showDetail, closeDetail } = useWalletDetail();
+const { detailVisible, detailData, showDetail, closeDetail } = useChannelDetail();
 const { dialogWidth, formLayout } = useLayoutModel();
 const formDialogWidth = computed(() => dialogWidth("40%"));
 const detailDialogWidth = computed(() => dialogWidth("680px"));
 
 const tradeTypeOptions = computed(() =>
   Object.entries(userStores.trade_type)
-    .filter(([value]) => userStores.trade_type_config?.[value]?.TargetType !== 1)
+    .filter(([value]) => userStores.trade_type_config?.[value]?.TargetType === 1)
     .map(([value, label]) => ({ value, label }))
 );
 
 const formData = reactive<FormData>({
-  form: { name: "", trade_type: "", address: "" },
+  form: { name: "", trade_type: "", qrcode: "", config: "" },
   search: false
 });
+
+const channelQrcodeText = (record: List) => {
+  return record.qrcode || "";
+};
 
 const selectedKeys = ref<string[]>([]);
 const loading = ref(false);
@@ -315,15 +326,16 @@ const columns = [
   { title: "ID", align: "center", dataIndex: "id", width: 80 },
   { title: "名称", align: "center", dataIndex: "name", width: 200 },
   { title: "交易类型", align: "center", dataIndex: "trade_type", width: 120 },
-  { title: "钱包地址", align: "center", dataIndex: "address", slotName: "address", width: 300, ellipsis: true },
+  { title: "二维码地址", align: "center", dataIndex: "qrcode", slotName: "qrcode", width: 300, ellipsis: true },
   { title: "收款状态", dataIndex: "status", align: "center", slotName: "status", width: 100 },
   { title: "其它通知", dataIndex: "other_notify", align: "center", slotName: "other_notify", width: 100 },
   { title: "操作", slotName: "optional", align: "center", fixed: "right", width: 200 }
 ];
 
 const rules = {
-  name: [{ required: true, message: "请输入钱包名称" }],
-  address: [{ required: true, message: "请输入钱包地址" }],
+  name: [{ required: true, message: "请输入通道名称" }],
+  qrcode: [{ required: true, message: "请输入二维码地址" }],
+  config: [{ required: true, message: "请输入配置" }],
   trade_type: [{ required: true, message: "请输入交易类型" }]
 };
 
@@ -336,7 +348,8 @@ const modOpen = ref(false);
 
 const addFrom = ref<AddForm>({
   name: "",
-  address: "",
+  qrcode: "",
+  config: "",
   trade_type: "",
   remark: "",
   other_notify: 0
@@ -345,7 +358,8 @@ const addFrom = ref<AddForm>({
 const modFrom = ref<ModForm>({
   id: 0,
   name: "",
-  address: "",
+  qrcode: "",
+  config: "",
   trade_type: "",
   remark: "",
   other_notify: 0,
@@ -363,21 +377,21 @@ const pageSizeChange = (pageSize: number) => {
 };
 
 const onReset = () => {
-  formData.form = { name: "", trade_type: "", address: "" };
+  formData.form = { name: "", trade_type: "", qrcode: "", config: "" };
   getCommonTableList();
 };
 
 const getCommonTableList = async () => {
   try {
     loading.value = true;
-    const res = await getWalletListAPI({
+    const res = await getChannelListAPI({
       page: pagination.value.current,
       size: pagination.value.pageSize,
       sort: "desc",
       keyword: "",
       name: formData.form.name,
       trade_type: formData.form.trade_type,
-      address: formData.form.address,
+      qrcode: formData.form.qrcode,
       status: 99
     });
 
@@ -391,7 +405,7 @@ const getCommonTableList = async () => {
 
 const onDelete = async (record: List) => {
   try {
-    await delWalletAPI({ id: record.id });
+    await delChannelAPI({ id: record.id });
     getCommonTableList();
     Notification.success("删除成功");
   } catch (error) {
@@ -400,16 +414,17 @@ const onDelete = async (record: List) => {
 };
 
 const onAdd = () => {
-  title.value = "新增钱包";
+  title.value = "新增通道";
   open.value = true;
 };
 
 const onMod = (record: List) => {
-  modTitle.value = "修改钱包";
+  modTitle.value = "修改通道";
   modFrom.value = {
     id: record.id,
     name: record.name,
-    address: record.address,
+    qrcode: record.qrcode,
+    config: record.config,
     trade_type: record.trade_type || "",
     remark: record.remark || "",
     other_notify: record.other_notify || 0,
@@ -422,7 +437,8 @@ const afterClose = () => {
   formRef.value.resetFields();
   addFrom.value = {
     name: "",
-    address: "",
+    qrcode: "",
+    config: "",
     trade_type: "",
     remark: "",
     other_notify: 0
@@ -434,7 +450,8 @@ const afterModClose = () => {
   modFrom.value = {
     id: 0,
     name: "",
-    address: "",
+    qrcode: "",
+    config: "",
     trade_type: "",
     remark: "",
     other_notify: 0,
@@ -442,7 +459,7 @@ const afterModClose = () => {
   };
 };
 
-const addWallet = async () => {
+const addChannel = async () => {
   const state = await formRef.value.validate();
   if (state) return;
 
@@ -451,7 +468,7 @@ const addWallet = async () => {
       ...addFrom.value,
       other_notify: addFrom.value.other_notify ?? 0
     };
-    await addWalletAPI(submitData);
+    await addChannelAPI(submitData);
     open.value = false;
     getCommonTableList();
     Notification.success("添加成功");
@@ -460,12 +477,12 @@ const addWallet = async () => {
   }
 };
 
-const modWallet = async () => {
+const modChannel = async () => {
   const state = await modFormRef.value.validate();
   if (state) return;
 
   try {
-    await modWalletAPI(modFrom.value);
+    await modChannelAPI(modFrom.value);
     modOpen.value = false;
     getCommonTableList();
     Notification.success("修改成功");
@@ -482,10 +499,10 @@ getCommonTableList();
   margin-bottom: 20px;
 }
 
-.address-cell {
+.qrcode-cell {
   max-width: 250px;
 
-  .address-text {
+  .qrcode-text {
     font-family: "Monaco", "Menlo", "Consolas", monospace;
     font-size: 12px;
     word-break: break-all;
