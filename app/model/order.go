@@ -63,6 +63,7 @@ type Order struct {
 	Amount        string     `gorm:"column:amount;type:varchar(32);not null;default:0.00;comment:交易数额" json:"amount"`
 	Money         string     `gorm:"column:money;type:varchar(32);not null;default:0.00;comment:交易金额" json:"money"`
 	Address       string     `gorm:"column:address;type:varchar(128);index;not null;comment:收款地址" json:"address"`
+	QrcodeURL     string     `gorm:"-" json:"qrcode_url,omitempty"` // 二维码链接地址，不写入数据库
 	FromAddress   string     `gorm:"column:from_address;type:varchar(128);not null;default:'';comment:支付地址" json:"from_address"`
 	AddressLocked bool       `gorm:"column:address_locked;not null;default:false;comment:地址锁定 1:独占 0:共享" json:"address_locked"`
 	Status        int        `gorm:"column:status;not null;default:1;index;comment:交易状态" json:"status"`
@@ -72,6 +73,8 @@ type Order struct {
 	NotifyUrl     string     `gorm:"column:notify_url;type:varchar(255);not null;default:'';comment:异步地址" json:"notify_url"`
 	NotifyNum     int        `gorm:"column:notify_num;not null;default:0;comment:回调次数" json:"notify_num"`
 	NotifyState   int        `gorm:"column:notify_state;not null;default:0;comment:回调状态 1：成功 0：失败" json:"notify_state"`
+	RefOrderNo    string     `gorm:"column:ref_orderno;type:varchar(128);not null;default:'';index;comment:交易订单号" json:"ref_orderno"`
+	RefFrom       string     `gorm:"column:ref_from_info;type:varchar(128);not null;default:'';index;comment:交易付款方信息" json:"ref_from_info"`
 	RefHash       string     `gorm:"column:ref_hash;type:varchar(128);not null;default:'';index;comment:交易哈希" json:"ref_hash"`
 	RefBlockNum   int        `gorm:"column:ref_block_num;not null;default:0;comment:区块索引" json:"ref_block_num"`
 	ExpiredAt     time.Time  `gorm:"column:expired_at;not null;comment:失效时间" json:"expired_at"`
@@ -114,6 +117,17 @@ func (o *Order) MarkConfirming(blockNum int, from, hash string, at time.Time, am
 		o.Amount = amount.String()
 		o.Money = rate.Mul(amount).String()
 	}
+
+	Db.Save(o)
+}
+
+// 标记通道 等待交易确认
+func (o *Order) MarkChannelConfirming(ref_orderno, ref_from_info string, hash string, at time.Time) {
+	o.RefOrderNo = ref_orderno
+	o.RefFrom = ref_from_info
+	o.RefHash = hash
+	o.ConfirmedAt = &at
+	o.Status = OrderStatusConfirming
 
 	Db.Save(o)
 }

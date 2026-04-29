@@ -49,6 +49,7 @@ const init = () => {
     const colorMap = {
       USDT: "#1E90FF",
       USDC: "#32CD32",
+      CNYE: "#F754A8",
       TRX: "#FF4500"
     };
 

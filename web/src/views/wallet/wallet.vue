@@ -281,7 +281,11 @@ import { useWalletDetail } from "./detail";
 const userStores = useUserInfoStore();
 const { detailVisible, detailData, showDetail, closeDetail } = useWalletDetail();
 
-const tradeTypeOptions = computed(() => Object.entries(userStores.trade_type).map(([value, label]) => ({ value, label })));
+const tradeTypeOptions = computed(() =>
+  Object.entries(userStores.trade_type)
+    .filter(([value]) => userStores.trade_type_config?.[value]?.TargetType !== 1)
+    .map(([value, label]) => ({ value, label }))
+);
 
 const formData = reactive<FormData>({
   form: { name: "", trade_type: "", address: "" },

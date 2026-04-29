@@ -14,6 +14,7 @@ export const getCryptoColor = (crypto: string): string => {
   const colors: Record<string, string> = {
     USDT: "green",
     USDC: "blue",
+    CNYE: "magenta",
     TRX: "red",
     ETH: "purple",
     BNB: "orange"

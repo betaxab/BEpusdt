@@ -24,6 +24,7 @@ var supportCrypto = map[Crypto]CoinId{
 	TRX:  "tron",
 	BNB:  "binancecoin",
 	ETH:  "ethereum",
+	CNYE: "cnye-coin",
 }
 
 // TradeType 交易类型，当下类型开始增多，现在这里统一管理、尽量收缩配置项

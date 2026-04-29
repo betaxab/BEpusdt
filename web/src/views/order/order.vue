@@ -311,18 +311,26 @@ const getOrderList = async () => {
 const paidModalVisible = ref(false);
 const paidForm = reactive({
   ref_hash: "",
+  ref_orderno: "",
+  ref_from_info: "",
+  trade_type: "",
   recordId: 0
 });
 
 const showPaidModal = (record: List) => {
   paidForm.recordId = record.id;
+  paidForm.trade_type = record.trade_type;
   paidForm.ref_hash = "";
+  paidForm.ref_orderno = "";
+  paidForm.ref_from_info = "";
   paidModalVisible.value = true;
 };
 
 const closePaidModal = () => {
   paidModalVisible.value = false;
   paidForm.ref_hash = "";
+  paidForm.ref_orderno = "";
+  paidForm.ref_from_info = "";
   paidForm.recordId = 0;
 };
 
@@ -330,6 +338,8 @@ const confirmPaid = async () => {
   try {
     await paidAPI({
       id: paidForm.recordId,
+      ref_orderno: paidForm.ref_orderno || "",
+      ref_from_info: paidForm.ref_from_info || "",
       ref_hash: paidForm.ref_hash || "" // 确保空时传递空字符串
     });
     closePaidModal();
