@@ -196,9 +196,9 @@
         :bordered="false"
         v-if="(detailData.status === 2 || detailData.status === 5) && userStores.trade_type_config[detailData.trade_type]?.TargetType === 1"
       >
-        <template v-else-if="tradeInfoTemplate === 'alipayMck'">
+        <template v-if="tradeInfoTemplate === 'duolabaoQr'">
           <a-row :gutter="24">
-            <a-col :span="12" v-if="detailData.ref_hash">
+            <a-col :xs="24" :sm="24" :md="12" v-if="detailData.ref_hash">
               <div class="detail-item">
                 <div class="detail-label">
                   <icon-swap />
@@ -207,7 +207,7 @@
                 <div class="detail-value">{{ detailData.ref_hash }}</div>
               </div>
             </a-col>
-            <a-col :span="12" v-if="detailData.ref_from_info">
+            <a-col :xs="24" :sm="24" :md="12" v-if="detailData.ref_from_info">
               <div class="detail-item">
                 <div class="detail-label">
                   <icon-user />
@@ -218,7 +218,49 @@
             </a-col>
           </a-row>
           <a-row :gutter="24">
-            <a-col :span="12" v-if="detailData.ref_orderno">
+            <a-col :xs="24" :sm="24" :md="12" v-if="detailData.from_address">
+              <div class="detail-item">
+                <div class="detail-label">
+                  <icon-send />
+                  <span>交易订单号（微信/支付宝）</span>
+                </div>
+                <div class="detail-value">{{ detailData.from_address }}</div>
+              </div>
+            </a-col>
+            <a-col :xs="24" :sm="24" :md="12" v-if="detailData.ref_orderno">
+              <div class="detail-item">
+                <div class="detail-label">
+                  <icon-file />
+                  <span>银行流水号</span>
+                </div>
+                <div class="detail-value">{{ detailData.ref_orderno }}</div>
+              </div>
+            </a-col>
+          </a-row>
+        </template>
+        <template v-else-if="tradeInfoTemplate === 'alipayMck'">
+          <a-row :gutter="24">
+            <a-col :xs="24" :sm="24" :md="12" v-if="detailData.ref_hash">
+              <div class="detail-item">
+                <div class="detail-label">
+                  <icon-swap />
+                  <span>交易订单号</span>
+                </div>
+                <div class="detail-value">{{ detailData.ref_hash }}</div>
+              </div>
+            </a-col>
+            <a-col :xs="24" :sm="24" :md="12" v-if="detailData.ref_from_info">
+              <div class="detail-item">
+                <div class="detail-label">
+                  <icon-user />
+                  <span>付款方账号</span>
+                </div>
+                <div class="detail-value">{{ detailData.ref_from_info }}</div>
+              </div>
+            </a-col>
+          </a-row>
+          <a-row :gutter="24">
+            <a-col :xs="24" :sm="24" :md="12" v-if="detailData.ref_orderno">
               <div class="detail-item">
                 <div class="detail-label">
                   <icon-file />
@@ -231,7 +273,7 @@
         </template>
         <!-- 默认卡片信息 -->
         <a-row v-else :gutter="24">
-          <a-col :span="12" v-if="detailData.ref_orderno">
+          <a-col :xs="24" :sm="24" :md="12" v-if="detailData.ref_orderno">
             <div class="detail-item">
               <div class="detail-label">
                 <icon-swap />
@@ -240,7 +282,7 @@
               <div class="detail-value">{{ detailData.ref_orderno }}</div>
             </div>
           </a-col>
-          <a-col :span="12" v-if="detailData.ref_from_info">
+          <a-col :xs="24" :sm="24" :md="12" v-if="detailData.ref_from_info">
             <div class="detail-item">
               <div class="detail-label">
                 <icon-user />
@@ -355,10 +397,11 @@ const emits = defineEmits(["close", "refresh"]);
 
 const onClose = () => emits("close");
 
-type TradeInfoTemplate = "alipayMck" | "defaultChannel";
+type TradeInfoTemplate = "alipayMck" | "duolabaoQr" | "defaultChannel";
 
 const tradeInfoTemplateMap: Record<string, TradeInfoTemplate> = {
   "alipay.mck": "alipayMck",
+  "duolabao.qr": "duolabaoQr"
 };
 
 const tradeInfoTemplate = computed<TradeInfoTemplate>(() => tradeInfoTemplateMap[props.detailData.trade_type] || "defaultChannel");

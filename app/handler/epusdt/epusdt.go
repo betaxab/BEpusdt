@@ -164,7 +164,8 @@ func (Epusdt) CreateOrder(ctx *gin.Context) {
 	}))
 }
 
-func (Epusdt) UpdateOrder(ctx *gin.Context) {
+// UpdateOrder 更新订单，返回付款链接。更新订单不需要签名，因为创建订单时已经验证，只需要提交参数更新订单即可。
+func (e Epusdt) UpdateOrder(ctx *gin.Context) {
 	// 接收 trade_id, currency, network 三个参数
 	var req updateOrderReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -230,6 +231,11 @@ func (Epusdt) UpdateOrder(ctx *gin.Context) {
 		ctx.JSON(200, respFailJson(fmt.Sprintf("update order failed: %s", err.Error())))
 		return
 	}
+	newOrder, err = e.ensureOrderPayment(ctx, newOrder)
+	if err != nil {
+		ctx.JSON(200, respFailJson(fmt.Sprintf("payment create failed: %s", err.Error())))
+		return
+	}
 
 	// 返回响应数据
 	ctx.JSON(200, respSuccJson(gin.H{
@@ -240,13 +246,13 @@ func (Epusdt) UpdateOrder(ctx *gin.Context) {
 		"status":          newOrder.Status,
 		"amount":          newOrder.Money,
 		"actual_amount":   newOrder.Amount,
-		"token":           newOrder.Address,
+		"token":           paymentAddress(newOrder),
 		"expiration_time": uint64(newOrder.ExpiredAt.Sub(time.Now()).Seconds()),
 		"payment_url":     model.CheckoutUrl(host, newOrder.TradeId),
 	}))
 }
 
-func (Epusdt) CreateTransaction(ctx *gin.Context) {
+func (e Epusdt) CreateTransaction(ctx *gin.Context) {
 	var req createReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(200, respFailJson(fmt.Sprintf("请求参数错误：%s", err.Error())))
@@ -291,6 +297,11 @@ func (Epusdt) CreateTransaction(ctx *gin.Context) {
 
 		return
 	}
+	order, err = e.ensureOrderPayment(ctx, order)
+	if err != nil {
+		ctx.JSON(200, respFailJson(fmt.Sprintf("支付下单失败：%s", err.Error())))
+		return
+	}
 
 	log.Info(fmt.Sprintf("订单创建成功 商户订单：%s", req.OrderID))
 
@@ -303,7 +314,7 @@ func (Epusdt) CreateTransaction(ctx *gin.Context) {
 		"status":          order.Status,
 		"amount":          order.Money,
 		"actual_amount":   order.Amount,
-		"token":           order.Address,
+		"token":           paymentAddress(order),
 		"expiration_time": uint64(order.ExpiredAt.Sub(time.Now()).Seconds()),
 		"payment_url":     model.CheckoutUrl(utils.GetRequestHost(ctx.Request), order.TradeId),
 	}))
@@ -339,11 +350,16 @@ func (Epusdt) CancelTransaction(ctx *gin.Context) {
 	ctx.JSON(200, respSuccJson(gin.H{"trade_id": req.TradeID}))
 }
 
-func (Epusdt) Checkout(ctx *gin.Context) {
+func (e Epusdt) Checkout(ctx *gin.Context) {
 	tradeId := ctx.Param("trade_id")
-	if _, ok := model.GetTradeOrder(tradeId); !ok {
+	order, ok := model.GetTradeOrder(tradeId)
+	if !ok {
 		ctx.String(200, "order not found")
 
+		return
+	}
+	if _, err := e.ensureOrderPayment(ctx, order); err != nil {
+		ctx.String(200, fmt.Sprintf("payment create failed: %s", err.Error()))
 		return
 	}
 
@@ -402,7 +418,7 @@ func (Epusdt) Info(ctx *gin.Context) {
 		"status":        order.Status,                        // 订单状态
 		"money":         order.Money,                         // 订单金额
 		"actual_amount": order.Amount,                        // 实付数额
-		"token":         order.Address,                       // 收款地址
+		"token":         paymentAddress(order),               // 收款地址
 		"fiat":          order.Fiat,                          // 法币类型
 		"name":          order.Name,                          // 商品名称
 		"expired_at":    order.ExpiredAt.Unix(),              // 截止时间

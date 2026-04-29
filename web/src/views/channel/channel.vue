@@ -136,6 +136,29 @@
           </a-select>
         </a-form-item>
       </template>
+      <template v-else-if="addChannelFormTemplate === 'duolabaoQr'">
+        <a-form-item label="公钥(AccessKey)" required>
+          <a-input v-model="duolabaoConfig.access_key" placeholder="请输入公钥" allow-clear />
+        </a-form-item>
+        <a-form-item label="私钥(SecretKey)" required>
+          <a-input-password v-model="duolabaoConfig.secret_key" placeholder="请输入私钥" allow-clear />
+        </a-form-item>
+        <a-form-item label="商户编号(CustomerNum)" required>
+          <a-input v-model="duolabaoConfig.customer_num" placeholder="请输入商户编号" allow-clear />
+        </a-form-item>
+        <a-form-item label="代理商编号(可选)">
+          <a-input v-model="duolabaoConfig.agent_num" placeholder="可选，仅限代理商收款时需要" allow-clear />
+        </a-form-item>
+        <a-form-item label="店铺编号(ShopNum)">
+          <a-input v-model="duolabaoConfig.shop_num" placeholder="请输入店铺编号（可选）" allow-clear />
+        </a-form-item>
+        <a-form-item label="自定义回调通知地址(CallbackUrl)">
+          <a-input v-model="duolabaoConfig.callback_url" placeholder="回调通知地址（可选）" allow-clear />
+        </a-form-item>
+        <a-form-item label="完成页地址(CompleteUrl)">
+          <a-input v-model="duolabaoConfig.complete_url" placeholder="完成页地址，仅用于京东和银联支付（可选）" allow-clear />
+        </a-form-item>
+      </template>
       <a-form-item field="remark" label="备注信息" validate-trigger="blur">
         <a-textarea v-model="addFrom.remark" placeholder="请输入备注信息" allow-clear />
       </a-form-item>
@@ -181,6 +204,29 @@
             <a-option :value="0">关闭</a-option>
             <a-option :value="1">开启</a-option>
           </a-select>
+        </a-form-item>
+      </template>
+      <template v-else-if="modChannelFormTemplate === 'duolabaoQr'">
+        <a-form-item label="公钥(AccessKey)" required>
+          <a-input v-model="duolabaoConfig.access_key" placeholder="请输入公钥" allow-clear />
+        </a-form-item>
+        <a-form-item label="私钥(SecretKey)" required>
+          <a-input-password v-model="duolabaoConfig.secret_key" placeholder="请输入私钥" allow-clear />
+        </a-form-item>
+        <a-form-item label="商户编号(CustomerNum)" required>
+          <a-input v-model="duolabaoConfig.customer_num" placeholder="请输入商户编号" allow-clear />
+        </a-form-item>
+        <a-form-item label="代理商编号(可选)">
+          <a-input v-model="duolabaoConfig.agent_num" placeholder="可选，仅限代理商收款时需要" allow-clear />
+        </a-form-item>
+        <a-form-item label="店铺编号(ShopNum)">
+          <a-input v-model="duolabaoConfig.shop_num" placeholder="请输入店铺编号（可选）" allow-clear />
+        </a-form-item>
+        <a-form-item label="自定义回调通知地址(CallbackUrl)">
+          <a-input v-model="duolabaoConfig.callback_url" placeholder="回调地址（可选）" allow-clear />
+        </a-form-item>
+        <a-form-item label="完成页地址(CompleteUrl)">
+          <a-input v-model="duolabaoConfig.complete_url" placeholder="完成页地址，仅用于京东和银联支付（可选）" allow-clear />
         </a-form-item>
       </template>
       <a-form-item field="trade_type" label="交易类型" :rules="[{ required: true, message: '交易类型不能为空' }]">
@@ -275,7 +321,7 @@
               </div>
             </div>
           </a-col>
-          <a-col :xs="24" :sm="24" :md="12">
+          <a-col v-if="!isDuolabaoTradeType(detailData.trade_type)" :xs="24" :sm="24" :md="12">
             <div class="detail-item">
               <div class="detail-label">
                 <icon-notification />
@@ -340,6 +386,8 @@ const { dialogWidth, formLayout } = useLayoutModel();
 const formDialogWidth = computed(() => dialogWidth("40%"));
 const detailDialogWidth = computed(() => dialogWidth("680px"));
 
+const isDuolabaoTradeType = (tradeType?: string) => tradeType === "duolabao.qr";
+
 const tradeTypeOptions = computed(() =>
   Object.entries(userStores.trade_type)
     .filter(([value]) => userStores.trade_type_config?.[value]?.TargetType === 1)
@@ -359,8 +407,21 @@ const createDefaultAlipayConfig = () => ({
 
 const alipayConfig = ref(createDefaultAlipayConfig());
 
+const createDefaultDuolabaoConfig = () => ({
+  access_key: "",
+  secret_key: "",
+  agent_num: "",
+  customer_num: "",
+  shop_num: "",
+  callback_url: "",
+  complete_url: ""
+});
+
+const duolabaoConfig = ref(createDefaultDuolabaoConfig());
+
 const resetChannelConfigs = () => {
   alipayConfig.value = createDefaultAlipayConfig();
+  duolabaoConfig.value = createDefaultDuolabaoConfig();
 };
 
 const parseJsonConfig = (configText?: string) => {
@@ -373,7 +434,11 @@ const parseJsonConfig = (configText?: string) => {
 };
 
 const channelQrcodeText = (record: List) => {
-  return record.qrcode || "";
+  if (!isDuolabaoTradeType(record.trade_type)) {
+    return record.qrcode;
+  }
+  const config = parseJsonConfig(record.config);
+  return record.qrcode || config.customer_num || "";
 };
 
 type ChannelForm = AddForm | ModForm;
@@ -389,8 +454,22 @@ const applyAlipayChannelForm = (form: ChannelForm) => {
   return true;
 };
 
+const applyDuolabaoChannelForm = (form: ChannelForm) => {
+  const config = duolabaoConfig.value;
+  if (!config.access_key || !config.secret_key || !config.customer_num) {
+    Notification.error("请完善哆啦宝配置（AccessKey/SecretKey/CustomerNum）");
+    return false;
+  }
+
+  form.qrcode = config.customer_num.trim();
+  form.other_notify = 0;
+  form.config = JSON.stringify(config);
+  return true;
+};
+
 const channelFormHandlers: Record<string, ChannelFormHandler> = {
   "alipay.mck": applyAlipayChannelForm,
+  "duolabao.qr": applyDuolabaoChannelForm,
 };
 
 const applyChannelForm = (form: ChannelForm) => {
@@ -453,10 +532,11 @@ const modFrom = ref<ModForm>({
   status: 1
 });
 
-type ChannelFormTemplate = "alipayMck" | "defaultChannel";
+type ChannelFormTemplate = "alipayMck" | "duolabaoQr" | "defaultChannel";
 
 const channelFormTemplateMap: Record<string, ChannelFormTemplate> = {
   "alipay.mck": "alipayMck",
+  "duolabao.qr": "duolabaoQr",
 };
 
 const resolveChannelFormTemplate = (tradeType?: string): ChannelFormTemplate => {
@@ -540,6 +620,17 @@ const onMod = (record: List) => {
         appid: config.appid || "",
         publickey: config.publickey || "",
         privatekey: config.privatekey || ""
+      };
+      break;
+    case "duolabao.qr":
+      duolabaoConfig.value = {
+        access_key: config.access_key || "",
+        secret_key: config.secret_key || "",
+        agent_num: config.agent_num || "",
+        customer_num: config.customer_num || record.qrcode,
+        shop_num: config.shop_num || "",
+        callback_url: config.callback_url || "",
+        complete_url: config.complete_url || ""
       };
       break;
     default:
