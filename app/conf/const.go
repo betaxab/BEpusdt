@@ -19,6 +19,7 @@ const (
 	Ethereum = "ethereum"
 	Base     = "base"
 	Alipay   = "alipay"
+	Duolabao = "duolabao"
 )
 
 const (

@@ -34,6 +34,7 @@ func Init() error {
 	xlayerInit()
 	baseInit()
 	alipayMckInit()
+	duolabaoInit()
 
 	return nil
 }

@@ -290,6 +290,23 @@ var registry = map[TradeType]TradeTypeConf{
 		EndpointKey: "",
 		TargetType:  TargetTypeChannel,
 	},
+	DuolabaoQr: {
+		Alias:       "DuoLaBao・Qr",
+		NetworkName: "DuoLaBao",
+		Network:     conf.Duolabao,
+		Crypto:      CNYE,
+		Decimal:     2,
+		Native:      true,
+		Contract:    "duolabao",
+		AmountRange: Range{
+			MinAmount: decimal.NewFromFloat(0.01),
+			MaxAmount: decimal.NewFromFloat(50000),
+		},
+		ExplorerFmt:  "",
+		EndpointKey:  "",
+		AddrCaseSens: true,
+		TargetType:   TargetTypeChannel,
+	},
 }
 
 func init() {
