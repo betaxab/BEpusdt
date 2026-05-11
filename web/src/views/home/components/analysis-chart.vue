@@ -23,8 +23,9 @@ const colorMap: Record<string, string> = {
   USDC: "#32CD32",
   CNYE: "#F754A8",
   TRX: "#FF4500",
-  BNB: "#F5A623",
-  ETH: "#722ED1"
+  TON: "#0098EA",
+  ETH: "#722ED1",
+  BNB: "#F5A623"
 };
 
 const chartData = computed(() => {
