@@ -6,7 +6,7 @@ RUN npm install -g pnpm
 WORKDIR /web
 COPY web/package.json web/pnpm-lock.yaml ./
 
-RUN pnpm install --frozen-lockfile --shamefully-hoist
+RUN pnpm install --frozen-lockfile --shamefully-hoist --ignore-scripts
 
 COPY web/ ./
 RUN pnpm run build:prod
