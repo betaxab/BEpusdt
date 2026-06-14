@@ -147,6 +147,7 @@ func ValidateConfig(cfg *Config) error {
 	return nil
 }
 
+// Normalize 规范化哆啦宝配置，去掉首尾空白、补齐默认网关地址和接口版本。
 func (c *Config) Normalize() {
 	c.GatewayURL = strings.TrimRight(strings.TrimSpace(c.GatewayURL), "/")
 	c.AccessKey = strings.TrimSpace(c.AccessKey)
@@ -254,7 +255,7 @@ func CreatePayment(ctx context.Context, cfg *Config, input CreateInput) (*Create
 		payload["outShopId"] = value
 	}
 
-	body, err := json.Marshal(payload)
+	body, err := marshalRequestPayload(payload)
 	if err != nil {
 		return nil, fmt.Errorf("%w: marshal payload failed", ErrConfigInvalid)
 	}
@@ -285,25 +286,46 @@ func CreatePayment(ctx context.Context, cfg *Config, input CreateInput) (*Create
 		return result, nil
 	}
 
-	if errCode := strings.TrimSpace(common.ReadString(raw, "errorCode")); errCode != "" {
-		errMsg := strings.TrimSpace(common.ReadString(raw, "errorMsg"))
-		if errMsg == "" {
-			errMsg = strings.TrimSpace(common.ReadString(raw, "message"))
-		}
-		if errMsg == "" {
-			errMsg = "request failed"
-		}
-		return nil, fmt.Errorf("%w: [%s] %s", ErrResponseInvalid, errCode, errMsg)
-	}
+	return nil, fmt.Errorf("%w: %s", ErrResponseInvalid, formatCreateError(raw, result))
+}
 
-	errMsg := result.Msg
-	if errMsg == "" {
-		errMsg = strings.TrimSpace(common.ReadString(raw, "message"))
+// formatCreateError 从哆啦宝失败响应中提取错误码和错误信息。
+// 哆啦宝不同场景可能返回 errorCode/errorMsg、code/msg 或嵌套 error 字段，
+// 这里统一整理成便于日志和接口返回展示的文本。
+func formatCreateError(raw map[string]interface{}, result *CreateResult) string {
+	code := firstNonEmpty(
+		common.ReadString(raw, "errorCode"),
+		common.ReadString(raw, "code"),
+	)
+	msg := firstNonEmpty(
+		common.ReadString(raw, "errorMsg"),
+		result.Msg,
+		common.ReadString(raw, "message"),
+	)
+	if errPayload := common.ReadMap(raw, "error"); errPayload != nil {
+		code = firstNonEmpty(common.ReadString(errPayload, "errorCode"), common.ReadString(errPayload, "code"), code)
+		msg = firstNonEmpty(common.ReadString(errPayload, "errorMsg"), common.ReadString(errPayload, "message"), msg)
 	}
-	if errMsg == "" {
-		errMsg = "request failed"
+	if msg == "" {
+		msg = "request failed"
 	}
-	return nil, fmt.Errorf("%w: %s", ErrResponseInvalid, errMsg)
+	if code != "" {
+		return fmt.Sprintf("[%s] %s", code, msg)
+	}
+	return msg
+}
+
+// marshalRequestPayload 将下单参数编码成哆啦宝签名使用的 JSON 请求体。
+// 这里关闭 HTML 转义，保持 completeUrl 等 URL 参数中的 & 不被编码成 \u0026，
+// 以便签名 body 和实际请求 body 与参考实现保持一致。
+func marshalRequestPayload(payload map[string]interface{}) ([]byte, error) {
+	var buf bytes.Buffer
+	encoder := json.NewEncoder(&buf)
+	encoder.SetEscapeHTML(false)
+	if err := encoder.Encode(payload); err != nil {
+		return nil, err
+	}
+	return bytes.TrimSuffix(buf.Bytes(), []byte("\n")), nil
 }
 
 // ParseCallback 解析哆啦宝回调请求体。
@@ -439,6 +461,8 @@ func SignNotifyToken(secretKey, timestamp string, body []byte, includeBody bool)
 	return sha1Upper(signText)
 }
 
+// postJSON 向哆啦宝开放平台发送 JSON 请求，并返回原始响应体。
+// accessKey、timestamp、token 会按哆啦宝要求放入 HTTP Header。
 func postJSON(ctx context.Context, endpoint string, body []byte, accessKey, timestamp, token string) ([]byte, error) {
 	if ctx == nil {
 		ctx = context.Background()
@@ -472,11 +496,14 @@ func postJSON(ctx context.Context, endpoint string, body []byte, accessKey, time
 	return respBody, nil
 }
 
+// sha1Upper 计算 SHA1 摘要并转成大写十六进制字符串。
 func sha1Upper(text string) string {
 	sum := sha1.Sum([]byte(text))
 	return strings.ToUpper(hex.EncodeToString(sum[:]))
 }
 
+// parseBool 兼容解析哆啦宝响应里的布尔字段。
+// 部分响应会返回 true/false，部分可能返回 "true" 或 "1"。
 func parseBool(raw map[string]interface{}, key string) bool {
 	value, ok := raw[key]
 	if !ok || value == nil {
@@ -489,6 +516,7 @@ func parseBool(raw map[string]interface{}, key string) bool {
 	return text == "1" || text == "true"
 }
 
+// firstNonEmpty 返回第一个去除空白后不为空的字符串。
 func firstNonEmpty(values ...string) string {
 	for _, v := range values {
 		if strings.TrimSpace(v) != "" {

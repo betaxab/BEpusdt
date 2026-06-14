@@ -19,8 +19,10 @@ import (
 	"gorm.io/gorm"
 )
 
+// duolabaoTask 负责哆啦宝回调处理、超时订单清理和确认状态推进。
 type duolabaoTask struct{}
 
+// duolabaoTransfer 是哆啦宝支付回调转换后的内部交易信息。
 type duolabaoTransfer struct {
 	transfer
 	RefFromInfo string
@@ -28,7 +30,7 @@ type duolabaoTransfer struct {
 
 var duolabaoRunner duolabaoTask
 
-// duolabaoInit 注册哆啦宝后台任务。
+// duolabaoInit 注册哆啦宝回调处理器和后台定时任务。
 func duolabaoInit() {
 	duolabaoRunner = duolabaoTask{}
 	callback.RegisterDuolabaoNotify(duolabaoRunner.notify)
@@ -42,6 +44,8 @@ func duolabaoInit() {
 	})
 }
 
+// notify 处理哆啦宝异步支付通知。
+// 流程包括读取请求体、解析回调、匹配通道、验签、找本地订单、校验金额并把订单标记为确认中。
 func (d duolabaoTask) notify(ctx *gin.Context) {
 	parseBody, signBody, err := readDuolabaoCallbackBody(ctx)
 	if err != nil {
@@ -75,7 +79,7 @@ func (d duolabaoTask) notify(ctx *gin.Context) {
 		return
 	}
 
-	order, err := d.findOrder(callback.RequestNum)
+	order, err := d.findOrder(callback)
 	if err != nil {
 		log.Warn("DuolabaoNotify: order not found:", err.Error())
 		ctx.String(http.StatusOK, "fail")
@@ -122,6 +126,8 @@ func (d duolabaoTask) notify(ctx *gin.Context) {
 	ctx.String(http.StatusOK, "success")
 }
 
+// parseTransfer 将哆啦宝回调字段映射成内部通道交易结构。
+// 哆啦宝字段名称与 BEpusdt 订单字段语义不同，这里集中完成转换。
 func (d duolabaoTask) parseTransfer(callback *duolabao.CallbackData) (duolabaoTransfer, bool) {
 	if callback == nil {
 		return duolabaoTransfer{}, false
@@ -178,6 +184,8 @@ func (d duolabaoTask) tradeConfirmHandle(context.Context) {
 	}
 }
 
+// readDuolabaoCallbackBody 读取哆啦宝回调内容。
+// POST 等带 body 的请求用原始 body 参与验签；GET 回调从 query 组装解析 body，验签 body 为空。
 func readDuolabaoCallbackBody(ctx *gin.Context) ([]byte, []byte, error) {
 	if ctx.Request.Method != http.MethodGet {
 		body, err := ctx.GetRawData()
@@ -197,6 +205,8 @@ func readDuolabaoCallbackBody(ctx *gin.Context) ([]byte, []byte, error) {
 	return body, nil, nil
 }
 
+// findNotifyChannel 根据回调里的 customerNum 匹配本地启用的哆啦宝通道配置。
+// 只有一个可用通道且回调未带 customerNum 时，允许使用该通道作为 fallback。
 func (d duolabaoTask) findNotifyChannel(callback *duolabao.CallbackData) (model.Channel, *duolabao.Config, error) {
 	if callback == nil {
 		return model.Channel{}, nil, errors.New("callback is nil")
@@ -235,6 +245,7 @@ func (d duolabaoTask) findNotifyChannel(callback *duolabao.CallbackData) (model.
 	return model.Channel{}, nil, fmt.Errorf("no enabled duolabao channel matches customerNum %s", customerNum)
 }
 
+// listChannels 返回所有启用的哆啦宝支付通道。
 func (d duolabaoTask) listChannels() ([]model.Channel, error) {
 	channels := make([]model.Channel, 0)
 	err := model.Db.Where("trade_type = ? and status = ?", model.DuolabaoQr, model.ClStatusEnable).Find(&channels).Error
@@ -247,7 +258,35 @@ func (d duolabaoTask) listChannels() ([]model.Channel, error) {
 	return channels, nil
 }
 
-func (d duolabaoTask) findOrder(requestNum string) (model.Order, error) {
+// findOrder 根据哆啦宝回调定位本地订单。
+// 优先使用 requestNum 匹配本地 trade_id/order_id/ref_orderno；若找不到，再用 extraInfo 兜底匹配。
+// extraInfo 在下单时写入本地 trade_id，用于解决同一订单多次生成二维码导致旧 requestNum 被覆盖的问题。
+func (d duolabaoTask) findOrder(callback *duolabao.CallbackData) (model.Order, error) {
+	if callback == nil {
+		return model.Order{}, errors.New("callback is nil")
+	}
+	order, err := d.findOrderByLocalRef(callback.RequestNum)
+	if err == nil {
+		return order, nil
+	}
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return model.Order{}, err
+	}
+	if extraInfo := strings.TrimSpace(callback.ExtraInfo); extraInfo != "" {
+		order, extraErr := d.findOrderByLocalRef(extraInfo)
+		if extraErr == nil {
+			return order, nil
+		}
+		if !errors.Is(extraErr, gorm.ErrRecordNotFound) {
+			return model.Order{}, extraErr
+		}
+	}
+	return model.Order{}, err
+}
+
+// findOrderByLocalRef 使用单个本地引用值查找订单。
+// 兼容历史订单的 trade_id/order_id，以及新哆啦宝动态二维码保存的 ref_orderno。
+func (d duolabaoTask) findOrderByLocalRef(requestNum string) (model.Order, error) {
 	requestNum = strings.TrimSpace(requestNum)
 	if requestNum == "" {
 		return model.Order{}, errors.New("requestNum is empty")
@@ -263,12 +302,23 @@ func (d duolabaoTask) findOrder(requestNum string) (model.Order, error) {
 	}
 
 	err = model.Db.Where("order_id = ?", requestNum).Order("id desc").Limit(1).First(&order).Error
-	if err != nil {
+	if err == nil {
+		return order, nil
+	}
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return model.Order{}, err
 	}
-	return order, nil
+
+	err = model.Db.Where("ref_orderno = ? and trade_type = ?", requestNum, model.DuolabaoQr).Order("id desc").Limit(1).First(&order).Error
+	if err == nil {
+		return order, nil
+	}
+
+	return model.Order{}, err
 }
 
+// duolabaoAmountEqual 比较本地订单金额和哆啦宝回调金额。
+// 两边都按两位小数比较，避免字符串格式差异造成误判。
 func duolabaoAmountEqual(localAmount string, upstreamAmount decimal.Decimal) bool {
 	local, err := decimal.NewFromString(strings.TrimSpace(localAmount))
 	if err != nil {
@@ -277,6 +327,7 @@ func duolabaoAmountEqual(localAmount string, upstreamAmount decimal.Decimal) boo
 	return local.Round(2).Equal(upstreamAmount.Round(2))
 }
 
+// refHashUsed 判断哆啦宝上游订单号是否已经被其他订单使用，防止重复回调或重复入账。
 func (d duolabaoTask) refHashUsed(orderID int64, refHash string) bool {
 	refHash = strings.TrimSpace(refHash)
 	if refHash == "" {
@@ -289,6 +340,8 @@ func (d duolabaoTask) refHashUsed(orderID int64, refHash string) bool {
 	return count > 0
 }
 
+// parseDuolabaoCompleteTime 解析哆啦宝完成时间。
+// 兼容常见时间格式，解析失败时使用当前时间作为确认时间。
 func parseDuolabaoCompleteTime(value string) time.Time {
 	value = strings.TrimSpace(value)
 	if value == "" {
