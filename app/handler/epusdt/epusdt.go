@@ -55,7 +55,8 @@ type cancelReq struct {
 }
 
 type infoReq struct {
-	TradeID string `json:"trade_id" binding:"required"`
+	TradeID    string `json:"trade_id" binding:"required"`
+	StatusOnly bool   `json:"status_only"`
 }
 
 type methodsReq struct {
@@ -362,9 +363,11 @@ func (e Epusdt) Checkout(ctx *gin.Context) {
 
 		return
 	}
-	if _, err := e.ensureOrderPayment(ctx, order); err != nil {
-		ctx.String(200, fmt.Sprintf("payment create failed: %s", err.Error()))
-		return
+	if order.Status == model.OrderStatusWaiting {
+		if _, err := e.ensureOrderPayment(ctx, order); err != nil {
+			ctx.String(200, fmt.Sprintf("payment create failed: %s", err.Error()))
+			return
+		}
 	}
 
 	// 收银台模板
@@ -401,7 +404,7 @@ func (Epusdt) GetMethods(ctx *gin.Context) {
 	}))
 }
 
-func (Epusdt) Info(ctx *gin.Context) {
+func (e Epusdt) Info(ctx *gin.Context) {
 	var req infoReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(200, respFailJson(fmt.Sprintf("参数错误：%s", err.Error())))
@@ -411,6 +414,16 @@ func (Epusdt) Info(ctx *gin.Context) {
 	order, ok := loadPayOrder(ctx, req.TradeID)
 	if !ok {
 		return
+	}
+	if !req.StatusOnly && order.TradeType == model.DuolabaoQr && order.Status == model.OrderStatusWaiting {
+		if _, ok := cachedDuolabaoPaymentURL(order.TradeId); !ok {
+			refreshedOrder, err := e.ensureOrderPayment(ctx, order)
+			if err != nil {
+				ctx.JSON(200, respFailJson(fmt.Sprintf("支付下单失败：%s", err.Error())))
+				return
+			}
+			order = refreshedOrder
+		}
 	}
 
 	ctx.JSON(200, respSuccJson(gin.H{

@@ -26,8 +26,13 @@ func (e Epusdt) ensureOrderPayment(ctx *gin.Context, order model.Order) (model.O
 
 // paymentAddress 返回对外展示的付款地址；动态二维码通道可使用虚拟地址。
 func paymentAddress(order model.Order) string {
-	if order.TradeType == model.DuolabaoQr && strings.TrimSpace(order.QrcodeURL) != "" {
-		return order.QrcodeURL
+	if order.TradeType == model.DuolabaoQr {
+		if paymentURL, ok := cachedDuolabaoPaymentURL(order.TradeId); ok {
+			return paymentURL
+		}
+		if strings.TrimSpace(order.QrcodeURL) != "" {
+			return order.QrcodeURL
+		}
 	}
 	return order.Address
 }

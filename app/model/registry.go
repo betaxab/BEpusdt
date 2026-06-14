@@ -320,7 +320,7 @@ var registry = map[TradeType]TradeTypeConf{
 	},
 	DuolabaoQr: {
 		Alias:       "DuoLaBao・Qr",
-		NetworkName: "DuoLaBao",
+		NetworkName: "JDPay",
 		Network:     conf.Duolabao,
 		Crypto:      CNYE,
 		Decimal:     2,
