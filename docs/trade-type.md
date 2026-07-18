@@ -18,3 +18,14 @@
 |     Ton      |   `usdt.ton`    |                 |   `ton.gram`   |
 
 ---
+
+## 第三方通道
+
+| **通道** | **交易类型** | **说明** |
+|:------:|:----------:|:------|
+| 支付宝 | `alipay.mck` | 支付宝通道 |
+| 京东支付 | `duolabao.qr` | 哆啦宝动态二维码 |
+| Stripe | `stripe.alipay` | Stripe Checkout，仅显示支付宝 |
+| Stripe | `stripe.wechatpay` | Stripe Checkout，仅显示微信支付 |
+| Stripe | `stripe.card` | Stripe Checkout，仅显示银行卡 |
+| Stripe | `stripe.all` | Stripe Checkout，不限制页面内付款类型 |

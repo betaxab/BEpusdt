@@ -6,6 +6,7 @@ import (
 	"github.com/v03413/bepusdt/app/model"
 	"github.com/v03413/bepusdt/app/payment/alipaymck"
 	"github.com/v03413/bepusdt/app/payment/duolabao"
+	"github.com/v03413/bepusdt/app/payment/stripe"
 )
 
 func validateChannel(channel *model.Channel) error {
@@ -32,6 +33,14 @@ func validateChannel(channel *model.Channel) error {
 			return fmt.Errorf("配置格式错误: %v", err)
 		}
 		if err := duolabao.ValidateConfig(config); err != nil {
+			return fmt.Errorf("配置校验错误: %v", err)
+		}
+	case model.StripeAlipay, model.StripeWechatPay, model.StripeCard, model.StripeAll:
+		config, err := stripe.ParseConfigText(channel.Config)
+		if err != nil {
+			return fmt.Errorf("配置格式错误: %v", err)
+		}
+		if err := stripe.ValidateConfig(config); err != nil {
 			return fmt.Errorf("配置校验错误: %v", err)
 		}
 	}

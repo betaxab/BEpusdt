@@ -12,7 +12,11 @@ type orderPaymentEnsurer func(Epusdt, *gin.Context, model.Order) (model.Order, e
 
 // orderPaymentEnsurers 将通道专属支付准备逻辑从订单主流程中分离出来。
 var orderPaymentEnsurers = map[model.TradeType]orderPaymentEnsurer{
-	model.DuolabaoQr: Epusdt.ensureDuolabaoPayment,
+	model.DuolabaoQr:      Epusdt.ensureDuolabaoPayment,
+	model.StripeAlipay:    Epusdt.ensureStripePayment,
+	model.StripeWechatPay: Epusdt.ensureStripePayment,
+	model.StripeCard:      Epusdt.ensureStripePayment,
+	model.StripeAll:       Epusdt.ensureStripePayment,
 }
 
 // ensureOrderPayment 按交易类型分发可选的通道专属支付准备逻辑。
@@ -33,6 +37,9 @@ func paymentAddress(order model.Order) string {
 		if strings.TrimSpace(order.QrcodeURL) != "" {
 			return order.QrcodeURL
 		}
+	}
+	if model.IsStripeTradeType(order.TradeType) && strings.TrimSpace(order.QrcodeURL) != "" {
+		return order.QrcodeURL
 	}
 	return order.Address
 }

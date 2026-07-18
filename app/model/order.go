@@ -28,8 +28,12 @@ const (
 	OrderStatusConfirming = 5 // 等待交易确认
 	OrderStatusFailed     = 6 // 交易确认失败
 
-	AlipayMck  TradeType = "alipay.mck"
-	DuolabaoQr TradeType = "duolabao.qr"
+	AlipayMck       TradeType = "alipay.mck"
+	DuolabaoQr      TradeType = "duolabao.qr"
+	StripeAlipay    TradeType = "stripe.alipay"
+	StripeWechatPay TradeType = "stripe.wechatpay"
+	StripeCard      TradeType = "stripe.card"
+	StripeAll       TradeType = "stripe.all"
 
 	BscBnb      TradeType = "bsc.bnb"
 	EthereumEth TradeType = "ethereum.eth"
@@ -107,6 +111,15 @@ type MethodItem struct {
 	TokenNetName    string `json:"token_net_name"`
 	TokenCustomName string `json:"token_custom_name"`
 	IsPopular       bool   `json:"is_popular"`
+}
+
+func IsStripeTradeType(t TradeType) bool {
+	switch t {
+	case StripeAlipay, StripeWechatPay, StripeCard, StripeAll:
+		return true
+	default:
+		return false
+	}
 }
 
 func (o *Order) SetCanceled() error {

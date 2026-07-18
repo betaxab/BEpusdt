@@ -159,6 +159,23 @@
           <a-input v-model="duolabaoConfig.complete_url" placeholder="完成页地址，仅用于京东和银联支付（可选）" allow-clear />
         </a-form-item>
       </template>
+      <template v-else-if="addChannelFormTemplate === 'stripe'">
+        <a-form-item label="Secret Key" required>
+          <a-input-password v-model="stripeConfig.secret_key" placeholder="请输入 sk_live/sk_test 密钥" allow-clear />
+        </a-form-item>
+        <a-form-item label="Webhook Secret" required>
+          <a-input-password v-model="stripeConfig.webhook_secret" placeholder="请输入 whsec_ 开头的 webhook 密钥" allow-clear />
+        </a-form-item>
+        <a-form-item label="API Base URL">
+          <a-input v-model="stripeConfig.api_base_url" placeholder="默认 https://api.stripe.com" allow-clear />
+        </a-form-item>
+        <a-form-item label="成功页地址">
+          <a-input v-model="stripeConfig.success_url" placeholder="可选，默认使用本地回跳地址" allow-clear />
+        </a-form-item>
+        <a-form-item label="取消页地址">
+          <a-input v-model="stripeConfig.cancel_url" placeholder="可选，默认使用本地回跳地址" allow-clear />
+        </a-form-item>
+      </template>
       <a-form-item field="remark" label="备注信息" validate-trigger="blur">
         <a-textarea v-model="addFrom.remark" placeholder="请输入备注信息" allow-clear />
       </a-form-item>
@@ -227,6 +244,23 @@
         </a-form-item>
         <a-form-item label="完成页地址(CompleteUrl)">
           <a-input v-model="duolabaoConfig.complete_url" placeholder="完成页地址，仅用于京东和银联支付（可选）" allow-clear />
+        </a-form-item>
+      </template>
+      <template v-else-if="modChannelFormTemplate === 'stripe'">
+        <a-form-item label="Secret Key" required>
+          <a-input-password v-model="stripeConfig.secret_key" placeholder="请输入 sk_live/sk_test 密钥" allow-clear />
+        </a-form-item>
+        <a-form-item label="Webhook Secret" required>
+          <a-input-password v-model="stripeConfig.webhook_secret" placeholder="请输入 whsec_ 开头的 webhook 密钥" allow-clear />
+        </a-form-item>
+        <a-form-item label="API Base URL">
+          <a-input v-model="stripeConfig.api_base_url" placeholder="默认 https://api.stripe.com" allow-clear />
+        </a-form-item>
+        <a-form-item label="成功页地址">
+          <a-input v-model="stripeConfig.success_url" placeholder="可选，默认使用本地回跳地址" allow-clear />
+        </a-form-item>
+        <a-form-item label="取消页地址">
+          <a-input v-model="stripeConfig.cancel_url" placeholder="可选，默认使用本地回跳地址" allow-clear />
         </a-form-item>
       </template>
       <a-form-item field="trade_type" label="交易类型" :rules="[{ required: true, message: '交易类型不能为空' }]">
@@ -387,6 +421,7 @@ const formDialogWidth = computed(() => dialogWidth("40%"));
 const detailDialogWidth = computed(() => dialogWidth("680px"));
 
 const isDuolabaoTradeType = (tradeType?: string) => tradeType === "duolabao.qr";
+const isStripeTradeType = (tradeType?: string) => ["stripe.alipay", "stripe.wechatpay", "stripe.card", "stripe.all"].includes(tradeType || "");
 
 const tradeTypeOptions = computed(() =>
   Object.entries(userStores.trade_type)
@@ -419,9 +454,20 @@ const createDefaultDuolabaoConfig = () => ({
 
 const duolabaoConfig = ref(createDefaultDuolabaoConfig());
 
+const createDefaultStripeConfig = () => ({
+  secret_key: "",
+  webhook_secret: "",
+  api_base_url: "https://api.stripe.com",
+  success_url: "",
+  cancel_url: ""
+});
+
+const stripeConfig = ref(createDefaultStripeConfig());
+
 const resetChannelConfigs = () => {
   alipayConfig.value = createDefaultAlipayConfig();
   duolabaoConfig.value = createDefaultDuolabaoConfig();
+  stripeConfig.value = createDefaultStripeConfig();
 };
 
 const parseJsonConfig = (configText?: string) => {
@@ -435,7 +481,7 @@ const parseJsonConfig = (configText?: string) => {
 
 const channelQrcodeText = (record: List) => {
   if (!isDuolabaoTradeType(record.trade_type)) {
-    return record.qrcode;
+    return isStripeTradeType(record.trade_type) ? record.qrcode || record.trade_type : record.qrcode;
   }
   const config = parseJsonConfig(record.config);
   return record.qrcode || config.customer_num || "";
@@ -467,9 +513,26 @@ const applyDuolabaoChannelForm = (form: ChannelForm) => {
   return true;
 };
 
+const applyStripeChannelForm = (form: ChannelForm) => {
+  const config = stripeConfig.value;
+  if (!config.secret_key || !config.webhook_secret) {
+    Notification.error("请完善 Stripe 配置（Secret Key/Webhook Secret）");
+    return false;
+  }
+
+  form.qrcode = form.qrcode || form.trade_type;
+  form.other_notify = 0;
+  form.config = JSON.stringify(config);
+  return true;
+};
+
 const channelFormHandlers: Record<string, ChannelFormHandler> = {
   "alipay.mck": applyAlipayChannelForm,
   "duolabao.qr": applyDuolabaoChannelForm,
+  "stripe.alipay": applyStripeChannelForm,
+  "stripe.wechatpay": applyStripeChannelForm,
+  "stripe.card": applyStripeChannelForm,
+  "stripe.all": applyStripeChannelForm,
 };
 
 const applyChannelForm = (form: ChannelForm) => {
@@ -532,11 +595,15 @@ const modFrom = ref<ModForm>({
   status: 1
 });
 
-type ChannelFormTemplate = "alipayMck" | "duolabaoQr" | "defaultChannel";
+type ChannelFormTemplate = "alipayMck" | "duolabaoQr" | "stripe" | "defaultChannel";
 
 const channelFormTemplateMap: Record<string, ChannelFormTemplate> = {
   "alipay.mck": "alipayMck",
   "duolabao.qr": "duolabaoQr",
+  "stripe.alipay": "stripe",
+  "stripe.wechatpay": "stripe",
+  "stripe.card": "stripe",
+  "stripe.all": "stripe",
 };
 
 const resolveChannelFormTemplate = (tradeType?: string): ChannelFormTemplate => {
@@ -631,6 +698,18 @@ const onMod = (record: List) => {
         shop_num: config.shop_num || "",
         callback_url: config.callback_url || "",
         complete_url: config.complete_url || ""
+      };
+      break;
+    case "stripe.alipay":
+    case "stripe.wechatpay":
+    case "stripe.card":
+    case "stripe.all":
+      stripeConfig.value = {
+        secret_key: config.secret_key || "",
+        webhook_secret: config.webhook_secret || "",
+        api_base_url: config.api_base_url || "https://api.stripe.com",
+        success_url: config.success_url || "",
+        cancel_url: config.cancel_url || ""
       };
       break;
     default:

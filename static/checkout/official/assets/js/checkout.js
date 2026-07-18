@@ -318,6 +318,19 @@
         if (b) b.disabled = !selMethod;
     }
 
+    function stripeCheckoutRedirectUrl(order) {
+        if (!order || Number(order.status) !== 1) return '';
+        if (order.trade_type !== 'stripe.card' && order.trade_type !== 'stripe.all') return '';
+        var raw = String(order.token || '').trim();
+        if (!/^https?:\/\//i.test(raw)) return '';
+        try {
+            var url = new URL(raw);
+            return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '';
+        } catch (e) {
+            return '';
+        }
+    }
+
     function startStatusCheck() {
         if (stTimer) clearInterval(stTimer);
         stTimer = setInterval(checkStatus, 5000);
@@ -494,6 +507,11 @@
             .then(function (r) { return r.json(); })
             .then(function (res) {
                 if (res.status_code === 200 && res.data && res.data.payment_url) {
+                    var stripeUrl = stripeCheckoutRedirectUrl(res.data);
+                    if (stripeUrl) {
+                        window.location.replace(stripeUrl);
+                        return;
+                    }
                     window.location.href = res.data.payment_url;
                 } else showToast(res.message || t('toastCreateFailed', '创建交易失败'), 'error');
             })
@@ -560,6 +578,7 @@
         applyI18n: applyI18n,
         t: t,
         showCanceled: showCanceled,
+        stripeCheckoutRedirectUrl: stripeCheckoutRedirectUrl,
         switchLang: switchLang
     };
 })();
@@ -637,6 +656,24 @@
         networkLogo.src = WEB3 + '/network/' + network + '.svg';
     }
 
+    function stripePaymentType(order) {
+        return order && (order.trade_type || '').indexOf('stripe.') === 0;
+    }
+
+    function stripePaymentButtonText(order) {
+        if (!stripePaymentType(order)) return '';
+        if (order.trade_type === 'stripe.alipay') return _t('openStripeAlipay', '打开支付宝付款');
+        if (order.trade_type === 'stripe.wechatpay') return _t('openStripeWechatPay', '打开微信支付');
+        return '';
+    }
+
+    function stripePaymentButtonI18nKey(order) {
+        if (!stripePaymentType(order)) return '';
+        if (order.trade_type === 'stripe.alipay') return 'openStripeAlipay';
+        if (order.trade_type === 'stripe.wechatpay') return 'openStripeWechatPay';
+        return '';
+    }
+
     function showSelection() {
         document.getElementById('selectionStage').style.display = 'block';
         document.getElementById('paymentStage').style.display = 'none';
@@ -686,6 +723,27 @@
         if (addr) addr.textContent = _t('receivingAddress', '收款地址');
         $('#qrcode').empty().qrcode({ text: paymentAddress, width: 200, height: 200 });
         updateQrPaymentLogo(currency, network);
+        var addressCard = document.getElementById('addressCard');
+        var nativePayButton = document.getElementById('nativePayButton');
+        if (stripePaymentType(d)) {
+            if (addressCard) addressCard.style.display = 'none';
+            if (nativePayButton) {
+                var buttonText = stripePaymentButtonText(d);
+                var buttonKey = stripePaymentButtonI18nKey(d);
+                nativePayButton.textContent = buttonText;
+                nativePayButton.href = paymentAddress || '#';
+                nativePayButton.style.display = buttonText ? 'block' : 'none';
+                if (buttonKey) nativePayButton.setAttribute('data-i18n', buttonKey);
+                else nativePayButton.removeAttribute('data-i18n');
+            }
+        } else {
+            if (addressCard) addressCard.style.display = '';
+            if (nativePayButton) {
+                nativePayButton.style.display = 'none';
+                nativePayButton.href = '#';
+                nativePayButton.removeAttribute('data-i18n');
+            }
+        }
         updateReselectButton();
         bindHelp('helpBtnQ', d.support_url);
         Payment.initQrPage({
@@ -732,6 +790,11 @@
                 orderData = res.data;
                 if (orderData.status === 4) {
                     if (window.Payment && Payment.showCanceled) Payment.showCanceled(orderData);
+                    return;
+                }
+                var stripeUrl = Payment.stripeCheckoutRedirectUrl ? Payment.stripeCheckoutRedirectUrl(orderData) : '';
+                if (stripeUrl) {
+                    window.location.replace(stripeUrl);
                     return;
                 }
                 if (!orderData.trade_type || !orderData.token) showSelection();

@@ -58,6 +58,8 @@
             'actions.back': '返回上一步',
             'actions.copyAddress': '复制地址',
             'actions.copied': '已复制',
+            'actions.openStripeAlipay': '打开支付宝付款',
+            'actions.openStripeWechatPay': '打开微信支付',
             'transfer.payAmount': '支付金额',
             'transfer.copyAmount': '复制支付金额',
             'transfer.info': '转账信息',
@@ -119,6 +121,8 @@
             'actions.back': '返回上一步',
             'actions.copyAddress': '複製地址',
             'actions.copied': '已複製',
+            'actions.openStripeAlipay': '開啟支付寶付款',
+            'actions.openStripeWechatPay': '開啟微信支付',
             'transfer.payAmount': '支付金額',
             'transfer.copyAmount': '複製支付金額',
             'transfer.info': '轉帳資訊',
@@ -177,6 +181,8 @@
             'actions.back': 'Back',
             'actions.copyAddress': 'Copy address',
             'actions.copied': 'Copied',
+            'actions.openStripeAlipay': 'Pay with Alipay',
+            'actions.openStripeWechatPay': 'Pay with WeChat Pay',
             'transfer.payAmount': 'Payment amount',
             'transfer.copyAmount': 'Copy payment amount',
             'transfer.info': 'Transfer details',
@@ -235,6 +241,8 @@
             'actions.back': 'Назад',
             'actions.copyAddress': 'Скопировать адрес',
             'actions.copied': 'Скопировано',
+            'actions.openStripeAlipay': 'Оплатить через Alipay',
+            'actions.openStripeWechatPay': 'Оплатить через WeChat Pay',
             'transfer.payAmount': 'Сумма оплаты',
             'transfer.copyAmount': 'Скопировать сумму оплаты',
             'transfer.info': 'Данные перевода',
@@ -293,6 +301,8 @@
             'actions.back': 'Quay lại',
             'actions.copyAddress': 'Sao chép địa chỉ',
             'actions.copied': 'Đã sao chép',
+            'actions.openStripeAlipay': 'Thanh toán bằng Alipay',
+            'actions.openStripeWechatPay': 'Thanh toán bằng WeChat Pay',
             'transfer.payAmount': 'Số tiền thanh toán',
             'transfer.copyAmount': 'Sao chép số tiền',
             'transfer.info': 'Thông tin chuyển khoản',
@@ -351,6 +361,8 @@
             'actions.back': 'Geri',
             'actions.copyAddress': 'Adresi kopyala',
             'actions.copied': 'Kopyalandı',
+            'actions.openStripeAlipay': 'Alipay ile öde',
+            'actions.openStripeWechatPay': 'WeChat Pay ile öde',
             'transfer.payAmount': 'Ödeme tutarı',
             'transfer.copyAmount': 'Ödeme tutarını kopyala',
             'transfer.info': 'Transfer bilgileri',
@@ -409,6 +421,8 @@
             'actions.back': '戻る',
             'actions.copyAddress': 'アドレスをコピー',
             'actions.copied': 'コピーしました',
+            'actions.openStripeAlipay': 'Alipayで支払う',
+            'actions.openStripeWechatPay': 'WeChat Payで支払う',
             'transfer.payAmount': '支払い金額',
             'transfer.copyAmount': '支払い金額をコピー',
             'transfer.info': '送金情報',
@@ -467,6 +481,8 @@
             'actions.back': '이전',
             'actions.copyAddress': '주소 복사',
             'actions.copied': '복사됨',
+            'actions.openStripeAlipay': 'Alipay로 결제',
+            'actions.openStripeWechatPay': 'WeChat Pay로 결제',
             'transfer.payAmount': '결제 금액',
             'transfer.copyAmount': '결제 금액 복사',
             'transfer.info': '송금 정보',
@@ -810,6 +826,30 @@
 
     function canReselectPayment() {
         return !!(orderData && orderData.reselect);
+    }
+
+    function isStripeOrder() {
+        return !!(orderData && String(orderData.trade_type || '').indexOf('stripe.') === 0);
+    }
+
+    function stripeCheckoutRedirectUrl(order) {
+        if (!order || Number(order.status) !== 1) return '';
+        if (order.trade_type !== 'stripe.card' && order.trade_type !== 'stripe.all') return '';
+        var raw = String(order.token || '').trim();
+        if (!/^https?:\/\//i.test(raw)) return '';
+        try {
+            var url = new URL(raw);
+            return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '';
+        } catch (e) {
+            return '';
+        }
+    }
+
+    function stripePaymentButtonText() {
+        if (!isStripeOrder()) return '';
+        if (orderData.trade_type === 'stripe.alipay') return t('actions.openStripeAlipay');
+        if (orderData.trade_type === 'stripe.wechatpay') return t('actions.openStripeWechatPay');
+        return '';
     }
 
     function updateReselectControls() {
@@ -1217,6 +1257,11 @@
             network: selectedMethod.network
         })
             .then(function (data) {
+                var stripeUrl = stripeCheckoutRedirectUrl(data);
+                if (stripeUrl) {
+                    window.location.replace(stripeUrl);
+                    return;
+                }
                 var nextTradeId = data.trade_id || tradeId;
                 var nextPaymentDetail = normalizeSelectedPayment(Object.assign({}, selectedMethod, data));
 
@@ -1299,6 +1344,8 @@
         var payTokenIcon = $('#payTokenIcon');
         var payNetworkIcon = $('#payNetworkIcon');
         var addressEl = $('#walletAddress');
+        var addressBox = $('#addressBox');
+        var nativePayButton = $('#nativePayButton');
         var networkInstruction = $('#networkInstruction');
         var amountInstruction = $('#amountInstruction');
 
@@ -1309,6 +1356,21 @@
         if (addressEl) addressEl.textContent = address;
         if (networkInstruction) networkInstruction.textContent = t('instruction.networkUse', {network: networkText});
         if (amountInstruction) amountInstruction.textContent = t('instruction.amount');
+        if (isStripeOrder()) {
+            if (addressBox) addressBox.style.display = 'none';
+            if (nativePayButton) {
+                var buttonText = stripePaymentButtonText();
+                nativePayButton.textContent = buttonText;
+                nativePayButton.href = address || '#';
+                nativePayButton.style.display = buttonText ? '' : 'none';
+            }
+        } else {
+            if (addressBox) addressBox.style.display = '';
+            if (nativePayButton) {
+                nativePayButton.href = '#';
+                nativePayButton.style.display = 'none';
+            }
+        }
 
         renderQrCode(address);
     }
@@ -1592,6 +1654,12 @@
                 }
                 if (data.status === 5) {
                     setStatusKey('status.waitingConfirm');
+                }
+
+                var stripeUrl = stripeCheckoutRedirectUrl(data);
+                if (stripeUrl) {
+                    window.location.replace(stripeUrl);
+                    return;
                 }
 
                 paymentDetail = normalizePaymentFromOrder(data);

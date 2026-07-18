@@ -15,6 +15,8 @@
   "poweredBy": "Powered by",
   "copyAmountTitle": "Copy amount",
   "networkPrefix": "Network · ",
+  "openStripeAlipay": "Pay with Alipay",
+  "openStripeWechatPay": "Pay with WeChat Pay",
   "receivingAddress": "Receiving Address",
   "copyAddressTitle": "Copy address",
   "reselectPayment": "Wrong payment method? Choose again",

@@ -186,7 +186,7 @@
                 <img class="qr-network-logo" id="qrNetworkLogo" alt="" style="display:none;">
             </div>
         </div>
-        <div class="address-card">
+        <div class="address-card" id="addressCard">
             <div class="address-label-row">
                 <span class="address-label" id="addressLabelQ" data-i18n="receivingAddress">收款地址</span>
                 <span class="copy-trigger" id="copyAddressBtn" data-i18n="[title]copyAddressTitle" title="复制地址">
@@ -200,6 +200,7 @@
             </div>
             <div class="address-value" id="walletAddress">--</div>
         </div>
+        <a class="pay-btn" id="nativePayButton" href="#" target="_blank" rel="noopener" style="display:none; text-decoration:none; text-align:center;" data-i18n="openPaymentApp">打开支付页面</a>
         <button class="reselect-btn" id="reselectPaymentBtn" type="button" style="display:none;" data-i18n="reselectPayment">
             选错了付款方式？返回重选
         </button>

@@ -211,7 +211,7 @@
                             </div>
                         </div>
 
-                        <div class="address-box prominent">
+                        <div class="address-box prominent" id="addressBox">
                             <label data-i18n="transfer.address">收款地址</label>
                             <code id="walletAddress">--</code>
                             <button class="copy-button" id="copyAddressButton" type="button" data-i18n="actions.copyAddress">复制地址</button>
@@ -233,6 +233,7 @@
                         </div>
 
                         <div class="action-row edge">
+                            <a class="button primary" id="nativePayButton" href="#" target="_blank" rel="noopener" style="display:none;">打开支付页面</a>
                             <button class="button secondary" id="backToMethodButton" type="button" data-step-target="1" data-i18n="actions.back" hidden>返回上一步</button>
                         </div>
                     </section>

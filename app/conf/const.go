@@ -26,6 +26,7 @@ const (
 	Base     = "base"
 	Alipay   = "alipay"
 	Duolabao = "duolabao"
+	Stripe   = "stripe"
 )
 
 const (

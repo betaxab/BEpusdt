@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -415,8 +416,16 @@ func (e Epusdt) Info(ctx *gin.Context) {
 	if !ok {
 		return
 	}
-	if !req.StatusOnly && order.TradeType == model.DuolabaoQr && order.Status == model.OrderStatusWaiting {
-		if _, ok := cachedDuolabaoPaymentURL(order.TradeId); !ok {
+	if !req.StatusOnly && order.Status == model.OrderStatusWaiting {
+		needsPayment := false
+		if order.TradeType == model.DuolabaoQr {
+			_, ok := cachedDuolabaoPaymentURL(order.TradeId)
+			needsPayment = !ok
+		}
+		if model.IsStripeTradeType(order.TradeType) {
+			needsPayment = strings.TrimSpace(order.QrcodeURL) == ""
+		}
+		if needsPayment {
 			refreshedOrder, err := e.ensureOrderPayment(ctx, order)
 			if err != nil {
 				ctx.JSON(200, respFailJson(fmt.Sprintf("支付下单失败：%s", err.Error())))

@@ -15,6 +15,8 @@
   "poweredBy": "Powered by",
   "copyAmountTitle": "复制金额",
   "networkPrefix": "区块网络 · ",
+  "openStripeAlipay": "打开支付宝付款",
+  "openStripeWechatPay": "打开微信支付",
   "receivingAddress": "收款地址",
   "copyAddressTitle": "复制地址",
   "reselectPayment": "选错了付款方式？返回重选",

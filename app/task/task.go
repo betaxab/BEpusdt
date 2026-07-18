@@ -35,6 +35,7 @@ func Init() error {
 	baseInit()
 	alipayMckInit()
 	duolabaoInit()
+	stripeInit()
 
 	return nil
 }

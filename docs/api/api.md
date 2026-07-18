@@ -510,6 +510,10 @@ MD5(amount=42&notify_url=http://example.com/notify&order_id=20220201030210321&re
 - `usdt.erc20` - USDT (ERC20)
 - `tron.trx` - TRX
 - `usdc.polygon` - USDC (Polygon)
+- `stripe.alipay` - Stripe Checkout 支付宝
+- `stripe.wechatpay` - Stripe Checkout 微信支付
+- `stripe.card` - Stripe Checkout 银行卡
+- `stripe.all` - Stripe Checkout 不限制付款类型
 
 ### 4. 回调通知如何验证签名？
 

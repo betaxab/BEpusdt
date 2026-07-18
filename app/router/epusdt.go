@@ -29,5 +29,8 @@ func epusdtInit(engine *gin.Engine) {
 		payGrp.POST("/duolabao/notify", epHdr.DuolabaoNotify)
 		payGrp.GET("/duolabao/notify", epHdr.DuolabaoNotify)
 		payGrp.GET("/duolabao/return/:trade_id", epHdr.DuolabaoReturn)
+		payGrp.POST("/stripe/notify", epHdr.StripeNotify)
+		payGrp.GET("/stripe/return/:trade_id", epHdr.StripeReturn)
+		payGrp.GET("/stripe/cancel/:trade_id", epHdr.StripeCancel)
 	}
 }
