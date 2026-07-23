@@ -420,6 +420,27 @@ POST /api/v1/pay/methods
 ---
 
 <details>
+<summary><strong>7. 系统支付回调入口</strong>　支付通道向 BEpusdt 发送通知时使用的路由。</summary>
+
+默认路由如下：
+
+| 配置项 | 默认路径 | 用途 |
+|---|---|---|
+| `payment_notify_route` | `/api/v1/pay/notify` | 后台创建订单使用的默认支付回调入口 |
+| `duolabao_notify_route` | `/api/v1/pay/duolabao/notify` | DuoLaBao 异步支付通知入口，支持 `GET` 和 `POST` |
+| `stripe_webhook_route` | `/api/v1/pay/stripe/notify` | Stripe Webhook 入口，仅支持 `POST` |
+
+可在“系统管理 → 基本设置 → API 设置”中修改。路径必须以 `/api/` 开头，三个路径不能重复，也不能占用已有系统接口。
+
+启用自定义路径后，对应旧默认路径将返回 `404`。DuoLaBao 通道配置中单独填写的回调地址优先于全局配置；修改 Stripe Webhook 路径后，需要同步更新 Stripe Dashboard 中的端点 URL。
+
+这些入口用于接收支付通道通知，不等同于创建订单时由商户传入的 `notify_url`。
+
+</details>
+
+---
+
+<details>
 <summary><strong>签名算法</strong></summary>
 
 ### 签名流程

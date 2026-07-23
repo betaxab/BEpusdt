@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -80,7 +81,7 @@ func (Order) Create(ctx *gin.Context) {
 	if hostUri == "" {
 		hostUri = host
 	}
-	order.NotifyUrl = hostUri + "/api/v1/pay/notify"
+	order.NotifyUrl = strings.TrimRight(hostUri, "/") + model.GetCallbackRoutes().PaymentNotify
 	order.ReturnUrl = url
 
 	if err := model.Db.Save(&order).Error; err != nil {

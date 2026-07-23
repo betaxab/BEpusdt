@@ -18,6 +18,9 @@ import (
 var confCache sync.Map
 var defaultConf = map[ConfKey]string{
 	ApiAppUri:               "",
+	PaymentNotifyRoute:      DefaultPaymentNotifyPath,
+	DuolabaoNotifyRoute:     DefaultDuolabaoNotifyPath,
+	StripeWebhookRoute:      DefaultStripeWebhookPath,
 	RateSyncInterval:        "3600",
 	AtomUSDT:                "0.01",
 	AtomUSDC:                "0.01",

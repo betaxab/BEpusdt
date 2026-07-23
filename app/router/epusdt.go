@@ -6,8 +6,10 @@ import (
 )
 
 func epusdtInit(engine *gin.Engine) {
-	epGrp := engine.Group("/pay")
 	epHdr := new(epusdt.Epusdt)
+	engine.Use(callbackRouteMiddleware(epHdr))
+
+	epGrp := engine.Group("/pay")
 	{
 		epGrp.GET("/checkout/:trade_id", epHdr.Checkout)
 	}

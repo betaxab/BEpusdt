@@ -41,7 +41,7 @@ func (Epusdt) ensureDuolabaoPayment(ctx *gin.Context, order model.Order) (model.
 
 	notifyURL := strings.TrimSpace(config.NotifyURL)
 	if notifyURL == "" {
-		notifyURL = strings.TrimRight(requestHost(ctx), "/") + "/api/v1/pay/duolabao/notify"
+		notifyURL = strings.TrimRight(requestHost(ctx), "/") + model.GetCallbackRoutes().DuolabaoNotify
 	}
 	returnURL := buildDuolabaoCompleteURL(ctx, order, config)
 	requestNum, err := buildDuolabaoRequestNum(order.TradeId)

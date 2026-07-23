@@ -18,6 +18,30 @@
             <a-input v-model="form.api_app_uri" placeholder="http(s)://your-host-uri" allow-clear />
           </a-form-item>
 
+          <a-form-item
+            field="payment_notify_route"
+            label="默认支付回调路由"
+            extra="后台创建订单使用的内部支付通知路径。自定义后旧默认路径将不可用。"
+          >
+            <a-input v-model="form.payment_notify_route" placeholder="/api/v1/pay/notify" allow-clear />
+          </a-form-item>
+
+          <a-form-item
+            field="duolabao_notify_route"
+            label="DuoLaBao Webhook 路由"
+            extra="通道未单独填写回调地址时，系统创建 DuoLaBao 支付会自动提交此路径。"
+          >
+            <a-input v-model="form.duolabao_notify_route" placeholder="/api/v1/pay/duolabao/notify" allow-clear />
+          </a-form-item>
+
+          <a-form-item
+            field="stripe_webhook_route"
+            label="Stripe Webhook 路由"
+            extra="修改后请同步更新 Stripe Dashboard 中配置的 Webhook 端点 URL。"
+          >
+            <a-input v-model="form.stripe_webhook_route" placeholder="/api/v1/pay/stripe/notify" allow-clear />
+          </a-form-item>
+
           <a-form-item field="payment_checkout" label="前台收银模板">
             <template #extra>
               <span v-html="currentCheckoutInfo"></span>
@@ -113,11 +137,68 @@ const layoutMode = computed(() => (isMobile.value ? "vertical" : "horizontal"));
 const form = ref({
   api_auth_token: "",
   api_app_uri: "",
+  payment_notify_route: "/api/v1/pay/notify",
+  duolabao_notify_route: "/api/v1/pay/duolabao/notify",
+  stripe_webhook_route: "/api/v1/pay/stripe/notify",
   payment_checkout: "",
   payment_support_url: "",
   payment_network_sort: ""
 });
-const rules = {};
+
+const callbackRouteDefaults = {
+  payment_notify_route: "/api/v1/pay/notify",
+  duolabao_notify_route: "/api/v1/pay/duolabao/notify",
+  stripe_webhook_route: "/api/v1/pay/stripe/notify"
+};
+
+const reservedCallbackRoutePrefixes = [
+  "/api/auth/",
+  "/api/conf/",
+  "/api/wallet/",
+  "/api/channel/",
+  "/api/order/",
+  "/api/rate/",
+  "/api/dashboard/",
+  "/api/v1/order/",
+  "/api/v1/pay/duolabao/return/",
+  "/api/v1/pay/stripe/return/",
+  "/api/v1/pay/stripe/cancel/"
+];
+
+const reservedCallbackRoutes = new Set(["/api/v1/pay/info", "/api/v1/pay/methods", "/api/v1/pay/update-order"]);
+
+const normalizeCallbackRoute = (value: string, fallback: string) => {
+  const route = (value || "").trim().replace(/\/+$/, "");
+  return route || fallback;
+};
+
+const validateCallbackRoute = (value: string, callback: (error?: string) => void) => {
+  const route = (value || "").trim();
+  if (!route.startsWith("/api/")) {
+    callback("回调路由必须以 /api/ 开头");
+    return;
+  }
+  if (/[?#\\]/.test(route)) {
+    callback("回调路由不能包含查询参数、锚点或反斜杠");
+    return;
+  }
+  const routeWithSlash = `${route.replace(/\/+$/, "")}/`;
+  if (
+    reservedCallbackRoutes.has(route.replace(/\/+$/, "")) ||
+    reservedCallbackRoutePrefixes.some(prefix => routeWithSlash.startsWith(prefix))
+  ) {
+    callback("该路径与系统已有接口冲突");
+    return;
+  }
+  callback();
+};
+
+const callbackRouteRule = [{ required: true, message: "请输入回调路由" }, { validator: validateCallbackRoute }];
+const rules = {
+  payment_notify_route: callbackRouteRule,
+  duolabao_notify_route: callbackRouteRule,
+  stripe_webhook_route: callbackRouteRule
+};
 const checkoutList = ref<Array<{ label: string; value: string; author: string; desc: string; link: string }>>([]);
 const checkoutListLoading = ref(false);
 const networkSortVisible = ref(false);
@@ -183,6 +264,18 @@ const syncFormFromConfig = () => {
 
   form.value.api_auth_token = data.value.api_auth_token || "";
   form.value.api_app_uri = data.value.api_app_uri || "";
+  form.value.payment_notify_route = normalizeCallbackRoute(
+    data.value.payment_notify_route,
+    callbackRouteDefaults.payment_notify_route
+  );
+  form.value.duolabao_notify_route = normalizeCallbackRoute(
+    data.value.duolabao_notify_route,
+    callbackRouteDefaults.duolabao_notify_route
+  );
+  form.value.stripe_webhook_route = normalizeCallbackRoute(
+    data.value.stripe_webhook_route,
+    callbackRouteDefaults.stripe_webhook_route
+  );
   form.value.payment_checkout = normalizePaymentCheckout(data.value.payment_checkout || data.value.payment_template);
   form.value.payment_support_url = data.value.payment_support_url || "";
   form.value.payment_network_sort = data.value.payment_network_sort || "";
@@ -238,11 +331,45 @@ const onSubmit = async ({ errors }: ArcoDesign.ArcoSubmit) => {
 
   form.value.payment_checkout = normalizePaymentCheckout(form.value.payment_checkout);
   form.value.payment_network_sort = networkOrder.value.join(",");
+  form.value.payment_notify_route = normalizeCallbackRoute(
+    form.value.payment_notify_route,
+    callbackRouteDefaults.payment_notify_route
+  );
+  form.value.duolabao_notify_route = normalizeCallbackRoute(
+    form.value.duolabao_notify_route,
+    callbackRouteDefaults.duolabao_notify_route
+  );
+  form.value.stripe_webhook_route = normalizeCallbackRoute(
+    form.value.stripe_webhook_route,
+    callbackRouteDefaults.stripe_webhook_route
+  );
+
+  const callbackRoutes = [
+    form.value.payment_notify_route,
+    form.value.duolabao_notify_route,
+    form.value.stripe_webhook_route
+  ];
+  if (new Set(callbackRoutes).size !== callbackRoutes.length) {
+    Message.error("三个回调路由不能重复");
+    return;
+  }
 
   await setsConfAPI([
     {
       key: "api_app_uri",
       value: form.value.api_app_uri
+    },
+    {
+      key: "payment_notify_route",
+      value: form.value.payment_notify_route
+    },
+    {
+      key: "duolabao_notify_route",
+      value: form.value.duolabao_notify_route
+    },
+    {
+      key: "stripe_webhook_route",
+      value: form.value.stripe_webhook_route
     },
     {
       key: "payment_checkout",

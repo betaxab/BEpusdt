@@ -45,6 +45,10 @@ const (
 	ApiAuthToken ConfKey = "api_auth_token" // API 对接令牌
 	ApiAppUri    ConfKey = "api_app_uri"    // API 对接地址（收银台地址）
 
+	PaymentNotifyRoute  ConfKey = "payment_notify_route"  // 默认支付回调路由
+	DuolabaoNotifyRoute ConfKey = "duolabao_notify_route" // DuoLaBao Webhook 路由
+	StripeWebhookRoute  ConfKey = "stripe_webhook_route"  // Stripe Webhook 路由
+
 	AtomUSDT ConfKey = "atom_usdt"
 	AtomUSDC ConfKey = "atom_usdc"
 	AtomCNYE ConfKey = "atom_cnye"
