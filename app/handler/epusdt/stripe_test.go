@@ -28,7 +28,7 @@ func TestEnsureStripePaymentCreatesCheckoutSession(t *testing.T) {
 		model.Db = oldDB
 	})
 
-	if err := model.Init(filepath.Join(t.TempDir(), "test.db"), "", ""); err != nil {
+	if err := model.Init(filepath.Join(t.TempDir(), "test.db"), ""); err != nil {
 		t.Fatal(err)
 	}
 
@@ -127,7 +127,7 @@ func TestInfoCreatesStripeCheckoutSessionWhenMissing(t *testing.T) {
 		model.Db = oldDB
 	})
 
-	if err := model.Init(filepath.Join(t.TempDir(), "test.db"), "", ""); err != nil {
+	if err := model.Init(filepath.Join(t.TempDir(), "test.db"), ""); err != nil {
 		t.Fatal(err)
 	}
 
