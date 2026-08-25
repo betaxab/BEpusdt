@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peach Pay 一款更好用的个人加密货币收款网关</title>
+    <link rel="shortcut icon" href="/checkout/tzdesign/assets/img/tz.svg">
+    <link rel="stylesheet" href="/checkout/tzdesign/assets/css/checkout.css">
+    <script src="/checkout/tzdesign/assets/js/jquery.min.js"></script>
+    <script src="/checkout/tzdesign/assets/js/jquery.qrcode.min.js"></script>
+    <script src="/checkout/tzdesign/assets/js/i18next.min.js"></script>
+    <script src="/checkout/tzdesign/assets/js/checkout.js"></script>
+</head>
+<body>
+<div class="checkout-card" id="selectionStage" style="display:none;">
+    <div class="card-header">
+        <div class="brand">
+            <div class="brand-logo brand-logo-plain">
+                <svg id="_layer_1" data-name="layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 256 256">
+                  <g id="color">
+                    <path d="M221.12,39.8s-15.68,29.3-39.51,39.51c-18.71,8.03-42.48,4.24-51.82,2.3-9.37,1.76-33.22,5.06-51.76-3.35-23.62-10.69-38.7-40.3-38.7-40.3,0,0,32.15-8.18,55.77,2.51,5.08,2.29,9.72,5.41,13.94,8.95,15.95,13.42,20.28,15,42.14.43,4.29-3.45,9-6.48,14.12-8.66,23.83-10.21,55.81-1.37,55.81-1.37Z" fill="#b1cc33" stroke="#b1cc33" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M230,144.94c-1.31,53.48-48.21,95.45-101.18,101.98-.21.04-.42.04-.63.08h-.46c-.88,0-1.73-.04-2.65-.08-47.79-10.79-93.89-52.8-98.69-101.98,0-7.42.8-14.71,2.32-21.7,2.7-12.6,7.8-24.36,14.71-34.77,11.13-12.18,27.6-19.85,46.02-19.85,9.57,0,18.54,2.02,26.59,5.69,5.44,2.49,11.5,3.12,17.24,1.85,1.9-.38,3.79-1.01,5.6-1.85,8.01-3.67,17.02-5.69,26.55-5.69,20.56,0,38.77,9.57,49.73,24.27,1.22,1.56,2.28,3.16,3.29,4.8,2.07,3.92,3.83,7.96,5.39,12.14.04.08.08.13.08.21.51,1.35.97,2.74,1.39,4.13.38,1.22.76,2.44,1.1,3.67.29,1.1.59,2.15.84,3.24,1.56,6.57,2.49,13.4,2.74,20.35.04,1.18.04,2.32.04,3.5Z" fill="#ffa7c0" stroke="#ffa7c0" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M133.25,76.16c4.42-.84,8.64-1.52,12.6-1.94-7.25,1.26-13.86,2.4-15.3,2.53.93-.21,1.81-.42,2.7-.59Z" fill="#e67a94" stroke="#e67a94" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M230,144.94c-1.31,53.48-48.21,95.45-101.18,101.98,85.18-19.89,132.38-185.1,17.02-172.69,9.1-1.56,19.26-3.24,21.45-3.24,19.43,0,36.75,8.55,47.83,21.91,1.22,1.56,2.28,3.16,3.29,4.8,2.07,3.92,3.83,7.96,5.39,12.14.04.08.08.13.08.21.51,1.35.97,2.74,1.39,4.13.38,1.22.76,2.44,1.1,3.67.29,1.1.59,2.15.84,3.24,1.64,6.57,2.61,13.36,2.74,20.35.04,1.18.04,2.32.04,3.5Z" fill="#e67a94" stroke="#e67a94" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M133.07,131.51c-3.03-14.51-14.36-23.31-14.36-23.31" fill="none" stroke="#e67a94" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                  </g>
+                  <g id="line">
+                    <path d="M150.95,50.31c4.24-3.49,8.92-6.59,13.99-8.82,23.74-10.45,55.83-1.9,55.83-1.9" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M220.77,39.59s-4.63,8.87-12.74,18.6" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M107.46,48.23c-4.24-3.49-8.92-6.59-13.99-8.82-23.74-10.45-55.83-1.9-55.83-1.9" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M37.64,37.5s4.32,8.26,11.91,17.59" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M127.7,42.06c-1.35-9.82-4.86-23.77-13.94-33.31" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M230,144.94c-1.31,53.48-48.21,95.45-101.18,101.98-.21.04-.42.04-.63.08h-.46c-.88,0-1.77.13-2.65-.08-47.79-10.79-93.89-52.8-98.69-101.98-.72-7.37.8-14.71,2.32-21.7,2.7-12.6,7.8-24.36,14.71-34.77,11.13-12.18,27.6-19.85,46.02-19.85,9.57,0,18.54,2.02,26.59,5.69,5.44,2.49,11.5,3.12,17.24,1.85,1.9-.38,3.79-1.01,5.6-1.85,8.01-3.67,17.02-5.69,26.55-5.69,20.56,0,38.77,9.57,49.73,24.27,1.22,1.56,2.28,3.16,3.29,4.8,2.07,3.92,3.83,7.96,5.39,12.14.04.08.08.13.08.21.51,1.35.97,2.74,1.39,4.13.38,1.22.76,2.44,1.1,3.67.29,1.1.59,2.15.84,3.24,1.64,6.57,2.61,13.36,2.74,20.35.04,1.18.04,2.32.04,3.5Z" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M146.85,200.07c8.6-30.2,13.67-74.23-15.75-103.72" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                  </g>
+                </svg>
+            </div>
+            <span class="brand-name" data-i18n="brandName">Peach Pay</span>
+        </div>
+        <a id="helpBtnS" href="#" class="help-btn tooltip-trigger" data-i18n="[aria-label]helpTitle;[data-tooltip]helpTitle" aria-label="联系客服" data-tooltip="联系客服" target="_blank">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        </a>
+    </div>
+    <div class="amount-block">
+        <div class="amount-fiat">
+            <span id="orderMoneyS">--</span>&nbsp;<span id="orderFiatS">--</span>
+        </div>
+        <div class="amount-crypto-row" style="display:none;">
+            <span class="amount-crypto-value" id="payAmountCrypto"></span>
+            <span class="copy-trigger amount-copy-trigger" id="copyAmountBtn" data-i18n="[aria-label]copyAmountTitle" aria-label="复制金额" role="button" tabindex="0">
+                <span class="copy-trigger-icon" id="copyAmountIcon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                </span>
+            </span>
+        </div>
+        <div class="amount-network-line" id="networkTagSep" style="display:none;">
+            <span class="network-tag" id="payNetworkTag"></span>
+        </div>
+    </div>
+    <div style="padding: 12px 24px 0; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div class="fee-notice">
+            <svg viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm.75 10.5h-1.5v-5h1.5v5zm0-6.5h-1.5V3.5h1.5V5z"/>
+            </svg>
+            <span data-i18n="feeNotice">请严格按照数额进行付款</span>
+        </div>
+        <div class="timer-badge-wrap">
+            <div class="timer-badge">
+                <span class="timer-label" data-i18n="timerLabel">到期时间</span>
+                <span class="timer-text" id="timerDisplay">--:--:--</span>
+            </div>
+            <svg class="timer-ring" aria-hidden="true">
+                <rect class="timer-ring-track" x="0.75" y="0.75" rx="7.25" ry="7.25" pathLength="100"/>
+                <rect class="timer-ring-bar" x="0.75" y="0.75" rx="7.25" ry="7.25" pathLength="100"/>
+            </svg>
+        </div>
+    </div>
+    <div class="divider"></div>
+    <div class="order-info">
+        <div class="order-row">
+            <span class="order-label" data-i18n="merchantOrder">商户订单</span>
+            <span class="order-value" id="orderIdS">--</span>
+        </div>
+    </div>
+    <div class="divider"></div>
+    <div class="form-section">
+        <label class="form-label" data-i18n="currencyLabel">货币</label>
+        <div class="custom-select" id="currencySelect">
+            <div class="select-trigger">
+                <span class="select-img select-img-placeholder" aria-hidden="true"></span>
+                <span class="select-text placeholder" data-i18n="selectCurrency">选择货币</span>
+                <svg class="select-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </div>
+            <div class="select-dropdown"></div>
+        </div>
+        <label class="form-label" data-i18n="networkLabel">网络</label>
+        <div class="custom-select" id="networkSelect">
+            <div class="select-trigger">
+                <span class="select-img select-img-placeholder" aria-hidden="true"></span>
+                <span class="select-text placeholder" data-i18n="selectNetwork">选择网络</span>
+                <svg class="select-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </div>
+            <div class="select-dropdown"></div>
+        </div>
+    </div>
+    <div class="pay-btn-wrap">
+        <button class="pay-btn" id="payBtn" disabled data-i18n="payBtn">继续付款</button>
+    </div>
+    <div class="card-footer">
+        <div class="footer-powered">
+            <span data-i18n="poweredBy">Powered by</span><a href="https://github.com/v03413/BEpusdt" target="_blank">BEpusdt</a>
+            <a href="https://github.com/v03413/BEpusdt" target="_blank" class="footer-github tooltip-trigger" aria-label="GitHub" data-tooltip="GitHub">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.071 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+</div>
+<div class="checkout-card" id="paymentStage" style="display:none;">
+    <div class="card-header">
+        <div class="brand">
+            <div class="brand-logo brand-logo-plain">
+                <svg id="_layer_1" data-name="layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 256 256">
+                  <g id="color">
+                    <path d="M221.12,39.8s-15.68,29.3-39.51,39.51c-18.71,8.03-42.48,4.24-51.82,2.3-9.37,1.76-33.22,5.06-51.76-3.35-23.62-10.69-38.7-40.3-38.7-40.3,0,0,32.15-8.18,55.77,2.51,5.08,2.29,9.72,5.41,13.94,8.95,15.95,13.42,20.28,15,42.14.43,4.29-3.45,9-6.48,14.12-8.66,23.83-10.21,55.81-1.37,55.81-1.37Z" fill="#b1cc33" stroke="#b1cc33" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M230,144.94c-1.31,53.48-48.21,95.45-101.18,101.98-.21.04-.42.04-.63.08h-.46c-.88,0-1.73-.04-2.65-.08-47.79-10.79-93.89-52.8-98.69-101.98,0-7.42.8-14.71,2.32-21.7,2.7-12.6,7.8-24.36,14.71-34.77,11.13-12.18,27.6-19.85,46.02-19.85,9.57,0,18.54,2.02,26.59,5.69,5.44,2.49,11.5,3.12,17.24,1.85,1.9-.38,3.79-1.01,5.6-1.85,8.01-3.67,17.02-5.69,26.55-5.69,20.56,0,38.77,9.57,49.73,24.27,1.22,1.56,2.28,3.16,3.29,4.8,2.07,3.92,3.83,7.96,5.39,12.14.04.08.08.13.08.21.51,1.35.97,2.74,1.39,4.13.38,1.22.76,2.44,1.1,3.67.29,1.1.59,2.15.84,3.24,1.56,6.57,2.49,13.4,2.74,20.35.04,1.18.04,2.32.04,3.5Z" fill="#ffa7c0" stroke="#ffa7c0" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M133.25,76.16c4.42-.84,8.64-1.52,12.6-1.94-7.25,1.26-13.86,2.4-15.3,2.53.93-.21,1.81-.42,2.7-.59Z" fill="#e67a94" stroke="#e67a94" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M230,144.94c-1.31,53.48-48.21,95.45-101.18,101.98,85.18-19.89,132.38-185.1,17.02-172.69,9.1-1.56,19.26-3.24,21.45-3.24,19.43,0,36.75,8.55,47.83,21.91,1.22,1.56,2.28,3.16,3.29,4.8,2.07,3.92,3.83,7.96,5.39,12.14.04.08.08.13.08.21.51,1.35.97,2.74,1.39,4.13.38,1.22.76,2.44,1.1,3.67.29,1.1.59,2.15.84,3.24,1.64,6.57,2.61,13.36,2.74,20.35.04,1.18.04,2.32.04,3.5Z" fill="#e67a94" stroke="#e67a94" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M133.07,131.51c-3.03-14.51-14.36-23.31-14.36-23.31" fill="none" stroke="#e67a94" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                  </g>
+                  <g id="line">
+                    <path d="M150.95,50.31c4.24-3.49,8.92-6.59,13.99-8.82,23.74-10.45,55.83-1.9,55.83-1.9" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M220.77,39.59s-4.63,8.87-12.74,18.6" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M107.46,48.23c-4.24-3.49-8.92-6.59-13.99-8.82-23.74-10.45-55.83-1.9-55.83-1.9" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M37.64,37.5s4.32,8.26,11.91,17.59" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M127.7,42.06c-1.35-9.82-4.86-23.77-13.94-33.31" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M230,144.94c-1.31,53.48-48.21,95.45-101.18,101.98-.21.04-.42.04-.63.08h-.46c-.88,0-1.77.13-2.65-.08-47.79-10.79-93.89-52.8-98.69-101.98-.72-7.37.8-14.71,2.32-21.7,2.7-12.6,7.8-24.36,14.71-34.77,11.13-12.18,27.6-19.85,46.02-19.85,9.57,0,18.54,2.02,26.59,5.69,5.44,2.49,11.5,3.12,17.24,1.85,1.9-.38,3.79-1.01,5.6-1.85,8.01-3.67,17.02-5.69,26.55-5.69,20.56,0,38.77,9.57,49.73,24.27,1.22,1.56,2.28,3.16,3.29,4.8,2.07,3.92,3.83,7.96,5.39,12.14.04.08.08.13.08.21.51,1.35.97,2.74,1.39,4.13.38,1.22.76,2.44,1.1,3.67.29,1.1.59,2.15.84,3.24,1.64,6.57,2.61,13.36,2.74,20.35.04,1.18.04,2.32.04,3.5Z" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                    <path d="M146.85,200.07c8.6-30.2,13.67-74.23-15.75-103.72" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14.22"/>
+                  </g>
+                </svg>
+            </div>
+            <span class="brand-name" data-i18n="brandName">Peach Pay</span>
+        </div>
+        <a id="helpBtnQ" href="#" class="help-btn tooltip-trigger" data-i18n="[aria-label]helpTitle;[data-tooltip]helpTitle" aria-label="联系客服" data-tooltip="联系客服" target="_blank">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        </a>
+    </div>
+    <div class="amount-block">
+        <div class="amount-crypto-row">
+            <span class="amount-crypto-value" id="payAmountQ"></span>
+            <span class="copy-trigger amount-copy-trigger" id="copyAmountQBtn" data-i18n="[aria-label]copyAmountTitle" aria-label="复制金额" role="button" tabindex="0">
+                <span class="copy-trigger-icon" id="copyAmountQIcon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                </span>
+            </span>
+        </div>
+        <div class="amount-meta-row">
+            <div class="amount-fiat">
+                <span id="orderMoneyQ">--</span>&nbsp;<span id="orderFiatQ">--</span>
+            </div>
+            <div class="amount-network-line">
+                <span class="network-tag" id="payNetworkQ">--</span>
+            </div>
+        </div>
+    </div>
+    <div style="padding: 12px 24px 0; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div class="fee-notice">
+            <svg viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm.75 10.5h-1.5v-5h1.5v5zm0-6.5h-1.5V3.5h1.5V5z"/>
+            </svg>
+            <span data-i18n="feeNotice">请严格按照数额进行付款</span>
+        </div>
+        <div class="timer-badge-wrap">
+            <div class="timer-badge">
+                <span class="timer-label" data-i18n="timerLabel">到期时间</span>
+                <span class="timer-text" id="timerDisplayQ">--:--:--</span>
+            </div>
+            <svg class="timer-ring" aria-hidden="true">
+                <rect class="timer-ring-track" x="0.75" y="0.75" rx="7.25" ry="7.25" pathLength="100"/>
+                <rect class="timer-ring-bar" x="0.75" y="0.75" rx="7.25" ry="7.25" pathLength="100"/>
+            </svg>
+        </div>
+    </div>
+    <div class="divider"></div>
+    <div class="order-info">
+        <div class="order-row">
+            <span class="order-label" data-i18n="merchantOrder">商户订单</span>
+            <span class="order-value" id="orderIdQ">--</span>
+        </div>
+    </div>
+    <div class="divider"></div>
+    <div class="qr-stage">
+        <div class="amount-confirm-card" id="alipayAmountConfirmCard" style="display:none;">
+            <div class="amount-confirm-message">为防止转错，您需要在下面输入正确的付款金额后才能显示二维码。</div>
+            <div class="amount-confirm-need">您需要向我方支付</div>
+            <div class="amount-confirm-value">
+                <span id="alipayConfirmAmount">--</span>
+                <span id="alipayConfirmFiat">CNY</span>
+                <button class="amount-confirm-copy-btn tooltip-trigger" id="copyConfirmAmountBtn" type="button" aria-label="复制金额" data-tooltip="复制金额" data-i18n="[aria-label]copyAmountTitle;[data-tooltip]copyAmountTitle">
+                    <span class="copy-trigger-icon" id="copyConfirmAmountIcon">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+            <label class="amount-confirm-label" for="alipayAmountInput">请问您要付多少钱？请输入：</label>
+            <div class="amount-confirm-input-row">
+                <input class="amount-confirm-input" id="alipayAmountInput" inputmode="decimal" autocomplete="off" placeholder="请输入付款金额">
+            </div>
+        </div>
+        <div class="qr-wrapper">
+            <div id="qrcode"></div>
+            <div class="qr-payment-logo" id="qrPaymentLogo" aria-hidden="true" style="display:none;">
+                <img class="qr-token-logo" id="qrTokenLogo" alt="">
+                <img class="qr-network-logo" id="qrNetworkLogo" alt="" style="display:none;">
+            </div>
+        </div>
+        <div class="address-card" id="addressCard">
+            <div class="address-label-row">
+                <span class="address-label" id="addressLabelQ" data-i18n="receivingAddress">收款地址</span>
+                <span class="copy-trigger tooltip-trigger" id="copyAddressBtn" data-i18n="[aria-label]copyAddressTitle;[data-tooltip]copyAddressTitle" aria-label="复制地址" data-tooltip="复制地址" role="button" tabindex="0">
+                    <span class="copy-trigger-icon" id="copyAddressIcon">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                    </span>
+                </span>
+            </div>
+            <div class="address-value" id="walletAddress">--</div>
+        </div>
+        <a class="native-pay-btn" id="nativePayButton" href="#" target="_blank" rel="noopener" style="display:none;">打开 APP</a>
+        <div class="payment-tip-card" id="paymentTipCard" style="display:none;">
+            <div class="payment-tip-title">💡提示：</div>
+            <div class="payment-tip-text" id="paymentTipText"></div>
+        </div>
+        <button class="reselect-btn" id="reselectPaymentBtn" type="button" style="display:none;" data-i18n="reselectPayment">
+            选错了付款方式？返回重选
+        </button>
+    </div>
+    <div class="card-footer">
+        <div class="footer-powered">
+            <span data-i18n="poweredBy">Powered by</span><a href="https://github.com/v03413/BEpusdt" target="_blank">BEpusdt</a>
+            <a href="https://github.com/v03413/BEpusdt" target="_blank" class="footer-github tooltip-trigger" aria-label="GitHub" data-tooltip="GitHub">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.071 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+</div>
+<div id="cmusToast" class="toast"></div>
+<div id="successModal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+        <div class="modal-body">
+            <div class="success-icon-wrap">
+                <svg class="success-checkmark" viewBox="0 0 52 52">
+                    <circle class="success-checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="success-checkmark-check" fill="none" d="M14 27 l8 8 l16-16"/>
+                </svg>
+            </div>
+            <h2 class="modal-title" data-i18n="paymentSuccess">支付成功！</h2>
+            <p class="modal-subtitle" data-i18n="paymentSuccessSubtitle">您的付款已确认，交易已完成</p>
+            <div id="txHashSection" class="tx-hash-card" style="display:none;">
+                <div class="tx-hash-label">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="2" y1="12" x2="22" y2="12"/>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    </svg>
+                    <span data-i18n="onChainDetails">链上详情</span>
+                </div>
+                <a id="txHashLink" href="#" target="_blank" class="tx-hash-value" style="text-decoration:none;">
+                    <span class="tx-hash-text" id="txHashDisplayText"></span>
+                    <svg class="tx-copy-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="7" y1="17" x2="17" y2="7"/>
+                        <polyline points="7 7 17 7 17 17"/>
+                    </svg>
+                </a>
+            </div>
+            <a href="#" id="returnBtn" class="return-btn" data-i18n="returnBtn">返回商户平台</a>
+        </div>
+        <div class="modal-footer">
+            <span data-i18n="poweredBy">Powered by</span>
+            <a href="https://github.com/v03413/BEpusdt" target="_blank">BEpusdt</a>
+            <a href="https://github.com/v03413/BEpusdt" target="_blank" class="modal-footer-github tooltip-trigger" aria-label="GitHub" data-tooltip="GitHub">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.071 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+</div>
+<div id="confirmingModal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+        <div class="modal-body">
+            <div class="confirming-spinner"></div>
+            <h2 class="modal-title" data-i18n="confirmingTitle">交易确认中</h2>
+            <p class="modal-subtitle" data-i18n="confirmingSubtitle">检测到付款，区块链网络确认中...</p>
+            <p class="confirming-note" data-i18n="confirmingNote">预计确认时间：1-3 分钟</p>
+        </div>
+        <div class="modal-footer">
+            <span data-i18n="poweredBy">Powered by</span>
+            <a href="https://github.com/v03413/BEpusdt" target="_blank">BEpusdt</a>
+            <a href="https://github.com/v03413/BEpusdt" target="_blank" class="modal-footer-github tooltip-trigger" aria-label="GitHub" data-tooltip="GitHub">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.071 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
